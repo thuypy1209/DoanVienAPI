@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Tổng quan hệ thống";
+}
+
+<div class="mb-4">
+    <h2 class="text-primary fw-bold">🚀 Dashboard Tổng Quan</h2>
+    <p class="text-muted">Chào mừng quay trở lại trang quản trị.</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary h-100 mb-3 text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Hoạt động</h5>
+                        <h2 class="display-4 fw-bold">@ViewBag.SoLuongHoatDong</h2>
+                    </div>
+                    <i class="bi bi-calendar-event fs-1 opacity-50"></i>
+                </div>
+                <p class="card-text"><small>Tổng số hoạt động đã tạo</small></p>
+            </div>
+            <div class="card-footer border-top-0 bg-transparent">
+                <a asp-action="HoatDong" class="text-decoration-none text-white">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-success h-100 mb-3 text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Lượt đăng ký</h5>
+                        <h2 class="display-4 fw-bold">@ViewBag.SoLuongDangKy</h2>
+                    </div>
+                    <i class="bi bi-people fs-1 opacity-50"></i>
+                </div>
+                <p class="card-text"><small>Tổng lượt sinh viên tham gia</small></p>
+            </div>
+            <div class="card-footer border-top-0 bg-transparent">
+                <span class="text-white-50">Cập nhật liên tục</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark h-100 mb-3 text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Tin nhắn mới</h5>
+                        <h2 class="display-4 fw-bold">0</h2>
+                    </div>
+                    <i class="bi bi-chat-dots fs-1 opacity-50"></i>
+                </div>
+                <p class="card-text"><small>Hỗ trợ sinh viên</small></p>
+            </div>
+             <div class="card-footer border-top-0 bg-transparent">
+                <a asp-controller="Chat" asp-action="Index" class="text-dark text-decoration-none">Đến mục chat <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body py-5 text-center">
+        <h4 class="text-muted">Hệ thống quản lý Đoàn viên - HUTECH</h4>
+        <p>Chọn các mục bên trái để bắt đầu quản lý.</p>
+    </div>
+</div>

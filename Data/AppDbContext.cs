@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DoanVienAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace DoanVienAPI.Models
+namespace DoanVienAPI.Data
 {
     public class AppDbContext : DbContext
     {
@@ -12,7 +13,7 @@ namespace DoanVienAPI.Models
         public DbSet<DangKyHoatDong> DangKyHoatDongs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+
             modelBuilder.Entity<SinhVien>()
                 .HasIndex(s => s.MSSV)
                 .IsUnique();

@@ -1,0 +1,62 @@
+﻿@model List<DoanVienAPI.Models.DangKyHoatDong>
+@{
+    var hd = ViewBag.HoatDong as DoanVienAPI.Models.HoatDong;
+    ViewData["Title"] = "Chi tiết hoạt động";
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body bg-light">
+            <h2 class="text-primary">@hd?.TenHoatDong</h2>
+            <p><strong>Thời gian:</strong> @hd?.ThoiGianBatDau</p>
+            <p><strong>Địa điểm:</strong> @hd?.DiaDiem</p>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
+
+    <h4>Danh sách sinh viên đăng ký (@Model.Count)</h4>
+
+    <table class="table-bordered table-hover mt-3 table">
+        <thead class="table-dark">
+            <tr>
+                <th>MSSV</th>
+                <th>Họ tên</th>
+                <th>Lớp</th>
+                <th>Ngày đăng ký</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                    <tr><td colspan="6" class="text-center">Chưa có ai đăng ký</td></tr>
+            }
+            @foreach (var item in Model)
+            {
+                    <tr>
+                        <td>@item.SinhVien?.MSSV</td>
+                        <td>@item.SinhVien?.HoTen</td>
+                        <td>@item.SinhVien?.Lop</td>
+                        <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                        @if (item.TrangThai == "DaThamGia")
+                        {
+                                    <span class="badge bg-success">Đã tham gia</span>
+                        }
+                        else
+                        {
+                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                        }
+                        </td>
+                        <td>
+                        @if (item.TrangThai != "DaThamGia")
+                        {
+                                    <a asp-action="ConfirmCheckIn" asp-route-id="@item.Id" class="btn btn-success btn-sm">✅ Duyệt / Check-in</a>
+                        }
+                        </td>
+                    </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
+using DoanVienAPI.Data;
 
 namespace DoanVienAPI.Controllers
 {
@@ -57,7 +58,11 @@ namespace DoanVienAPI.Controllers
             {
                 Message = "Đăng nhập thành công!",
                 Token = token,
-                HoTen = sinhVien.HoTen
+                HoTen = sinhVien.HoTen,
+                MSSV = sinhVien.MSSV,
+                Lop = sinhVien.Lop,
+                Khoa = sinhVien.Khoa,
+                DiemRL = sinhVien.DiemRenLuyenTichLuy
             });
         }
         [HttpPost("register")]

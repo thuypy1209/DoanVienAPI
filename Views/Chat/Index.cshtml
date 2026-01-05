@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Phòng Chat Admin";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">💬 Phòng Chat Chung (Admin & Sinh Viên)</h5>
+        </div>
+        <div class="card-body">
+            <div id="messagesList" class="mb-3 rounded border p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                <div class="text-muted small text-center">Chưa có tin nhắn nào...</div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="userInput" class="form-control" value="Admin" readonly style="max-width: 100px; font-weight: bold;">
+                <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
+                <button id="sendButton" class="btn btn-primary">Gửi ➤</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    // 1. Khởi tạo kết nối
+    const connection = new signalr.HubConnectionBuilder()
+        .withUrl("/chathub") // Đường dẫn khớp với Program.cs
+        .build();
+
+    // 2. Hàm nhận tin nhắn từ Server (App Mobile gửi lên hoặc Admin gửi)
+    connection.on("ReceiveMessage", function (user, message) {
+        const msgList = document.getElementById("messagesList");
+
+        // Xóa dòng "Chưa có tin nhắn" nếu có
+        if (msgList.innerText.trim() === "Chưa có tin nhắn nào...") {
+            msgList.innerHTML = "";
+        }
+
+        // Tạo bong bóng chat
+        const div = document.createElement("div");
+        const isMe = user === "Admin";
+
+        div.className = isMe ? "text-end mb-2" : "text-start mb-2";
+
+        div.innerHTML = `
+            <div class="d-inline-block p-2 rounded ${isMe ? 'bg-primary text-white' : 'text-dark border bg-white'}" style="max-width: 75%;">
+                <div class="small fw-bold ${isMe ? 'text-white-50' : 'text-primary'}">${user}</div>
+                <div>${message}</div>
+            </div>
+        `;
+
+        msgList.appendChild(div);
+        msgList.scrollTop = msgList.scrollHeight; // Tự cuộn xuống cuối
+    });
+
+    // 3. Bắt đầu kết nối
+    connection.start().then(function () {
+        document.getElementById("sendButton").disabled = false;
+        console.log("Đã kết nối SignalR Web!");
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    // 4. Sự kiện bấm nút Gửi
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        const user = document.getElementById("userInput").value;
+        const message = document.getElementById("messageInput").value;
+
+        if(message.trim() !== "") {
+            // Gọi hàm SendMessage bên Backend (ChatHub.cs)
+            connection.invoke("SendMessage", user, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+            document.getElementById("messageInput").value = ""; // Xóa ô nhập
+        }
+        event.preventDefault();
+    });
+
+    // Hỗ trợ bấm Enter để gửi
+    document.getElementById("messageInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            document.getElementById("sendButton").click();
+        }
+    });
+</script>

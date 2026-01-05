@@ -4,11 +4,13 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using DoanVienAPI.Models;
 using Microsoft.OpenApi.Models;
+using DoanVienAPI.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-// Đăng ký AppDbContext (Lúc này nó sẽ tự tìm trong folder Models)
+// Đăng ký AppDbContext (sẽ tự tìm trong folder Models)
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
 builder.Services.AddEndpointsApiExplorer();
 
@@ -18,8 +20,8 @@ builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "DoanVien API", Version = "v1" });
 
-    // 1. Định nghĩa Security (Cái ổ khóa)
-    // LƯU Ý: Ở đây KHÔNG CÓ thuộc tính Reference
+    // 1. Định nghĩa Security
+    //  KHÔNG CÓ thuộc tính Reference
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -30,13 +32,12 @@ builder.Services.AddSwaggerGen(option =>
         Scheme = "Bearer"
     });
 
-    // 2. Yêu cầu bảo mật (Chìa khóa để mở ổ)
+    // 2. Yêu cầu bảo mật 
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
-                // Reference nằm ở đây mới đúng!
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
@@ -47,28 +48,36 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-
-
-// 1. CẤU HÌNH JWT AUTHENTICATION
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+// --- 2. CẤU HÌNH CẢ COOKIE (CHO WEB) VÀ JWT (CHO APP) ---
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định là Web Admin
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
 // 2. CẤU HÌNH SIGNALR (SOCKET)
 builder.Services.AddSignalR();
 
 // 3. CẤU HÌNH CONTROLLERS
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 // 2. CẤU HÌNH SWAGGER
@@ -88,10 +97,22 @@ app.MapPost("/api/sinhvien", async (AppDbContext db, SinhVien sv) =>
     await db.SaveChangesAsync();
     return Results.Ok(sv);
 });
-app.UseAuthentication(); // <--- Thêm dòng này
+// Middleware
+app.UseHttpsRedirection();
+app.UseStaticFiles(); 
+app.UseRouting();
+
+
+//Authentication & Authorization
+app.UseAuthentication(); 
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Admin}/{action=Index}/{id?}");
 
+app.MapControllers();
+// Cấu hình SignalR
+app.MapHub<DoanVienAPI.Hubs.ChatHub>("/chathub");
 // Chạy ứng dụng
 app.Run("http://0.0.0.0:5000");

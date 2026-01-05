@@ -1,0 +1,61 @@
+﻿@model IEnumerable<HoatDong>
+
+@{
+    ViewData["Title"] = "Danh sách Hoạt động";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Danh sách Hoạt động</h1>
+    <a asp-action="Create" class="btn btn-success fw-bold">+ Tạo mới</a>
+</div>
+
+<table class="table-bordered table-hover table shadow-sm">
+    <thead class="table-primary text-center">
+        <tr>
+            <th>ID</th>
+            <th>Tên hoạt động</th>
+            <th>Thời gian</th>
+            <th>Địa điểm</th>
+            <th>Điểm</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-center">@item.Id</td>
+                <td class="fw-bold text-primary">@item.TenHoatDong</td>
+                <td>
+                    <div class="small">Bắt đầu: @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+                    <div class="small text-muted">Kết thúc: @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
+                </td>
+                <td>@item.DiaDiem</td>
+                <td class="fw-bold text-danger text-center">+@item.DiemCong</td>
+                <td class="text-center">
+                    @if (item.TrangThai == "SapDienRa")
+                    {
+                            <span class="badge bg-warning text-dark">Sắp diễn ra</span>
+                    }
+                    else if (item.TrangThai == "DangDienRa")
+                    {
+                            <span class="badge bg-success">Đang diễn ra</span>
+                    }
+                    else
+                    {
+                            <span class="badge bg-secondary">Đã kết thúc</span>
+                    }
+                </td>
+                <td class="text-center">
+                    <a asp-action="Details" asp-route-id="@item.Id"
+                        class="btn btn-sm btn-info text-white">Xem Chi Tiết</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" 
+                        class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" 
+                        class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Xóa</a>
+                </td>
+            </tr>
+        }
+</tbody>
+</table>

@@ -1,12 +1,16 @@
-﻿using DoanVienAPI.Models;
+﻿using System.Security.Claims;
+using DoanVienAPI.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DoanVienAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace DoanVienAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HoatDongController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -16,9 +20,16 @@ namespace DoanVienAPI.Controllers
             _context = context;
         }
 
+        // POST: api/HoatDong/them
+        [HttpPost("them")]
+        public async Task<IActionResult> ThemHoatDong([FromBody] HoatDong hoatDong)
+        {
+            _context.HoatDongs.Add(hoatDong);
+            await _context.SaveChangesAsync();
+            return Ok(hoatDong);
+        }
         // GET: api/HoatDong
         [HttpGet]
-        [Authorize] // Phải đăng nhập mới xem được
         public async Task<IActionResult> GetHoatDongs()
         {
             // Lấy danh sách, sắp xếp cái nào mới nhất lên đầu
@@ -27,5 +38,146 @@ namespace DoanVienAPI.Controllers
                                      .ToListAsync();
             return Ok(list);
         }
+        // 3. API ĐĂNG KÝ THAM GIA HOẠT ĐỘNG (POST)
+        [HttpPost("dangky/{hoatDongId}")]
+        public async Task<IActionResult> DangKy(int hoatDongId)
+        {
+            // 1. Lấy User ID từ Claims 
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized("Token không hợp lệ hoặc đã hết hạn.");
+            }
+
+            int sinhVienId = int.Parse(userIdString); // Chuyển đổi sang số nguyên
+
+            // 2. Kiểm tra Hoạt động có tồn tại không
+            var hd = await _context.HoatDongs.FindAsync(hoatDongId);
+            if (hd == null) return NotFound("Hoạt động không tồn tại.");
+
+            // 3. Kiểm tra xem đã đăng ký chưa (Dùng ID lấy từ Token)
+            var daDangKy = await _context.DangKyHoatDongs
+                .AnyAsync(dk => dk.SinhVienId == sinhVienId && dk.HoatDongId == hoatDongId);
+
+            if (daDangKy)
+            {
+                return BadRequest("Bạn đã đăng ký hoạt động này rồi.");
+            }
+
+            // 4. Tạo bản ghi đăng ký mới
+            var dangKy = new DangKyHoatDong
+            {
+                SinhVienId = sinhVienId,
+                HoatDongId = hoatDongId,
+                NgayDangKy = DateTime.Now,
+                TrangThai = "DaDangKy"
+            };
+
+            _context.DangKyHoatDongs.Add(dangKy);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Đăng ký thành công!", data = dangKy });
+        }
+        // GET: api/HoatDong/lich-su - Xem lịch sử đăng ký của bản thân
+        [HttpGet("lich-su")]
+        public async Task<IActionResult> GetLichSu()
+        {
+            // Lấy ID từ Token
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+            int sinhVienId = int.Parse(userIdString);
+
+            var list = await _context.DangKyHoatDongs
+                .Where(dk => dk.SinhVienId == sinhVienId)
+                .Include(dk => dk.HoatDong) // Kèm thông tin hoạt động
+                .OrderByDescending(dk => dk.NgayDangKy)
+                .Select(dk => new
+                {
+                    dk.HoatDong.TenHoatDong,
+                    dk.HoatDong.DiaDiem,
+                    ThoiGian = dk.HoatDong.ThoiGianBatDau,
+                    dk.TrangThai,
+                    dk.HoatDong.DiemCong
+                })
+                .ToListAsync();
+
+            return Ok(list);
+        }
+        // 1. API SỬA HOẠT ĐỘNG (PUT)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateHoatDong(int id, [FromBody] HoatDong model)
+        {
+            if (id != model.Id) return BadRequest("ID không khớp");
+
+            var hd = await _context.HoatDongs.FindAsync(id);
+            if (hd == null) return NotFound();
+
+            // Cập nhật thông tin
+            hd.TenHoatDong = model.TenHoatDong;
+            hd.MoTa = model.MoTa;
+            hd.DiaDiem = model.DiaDiem;
+            hd.ThoiGianBatDau = model.ThoiGianBatDau;
+            hd.ThoiGianKetThuc = model.ThoiGianKetThuc;
+            hd.DiemCong = model.DiemCong;
+            hd.TrangThai = model.TrangThai;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật thành công!" });
+        }
+
+        // 2. API XÓA HOẠT ĐỘNG (DELETE)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteHoatDong(int id)
+        {
+            var hd = await _context.HoatDongs.FindAsync(id);
+            if (hd == null) return NotFound();
+
+            _context.HoatDongs.Remove(hd);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đã xóa hoạt động!" });
+        }
+        [HttpGet("{id}/danhsach")]
+        public async Task<IActionResult> GetDanhSachDangKy(int id)
+        {
+            var list = await _context.DangKyHoatDongs
+                .Where(dk => dk.HoatDongId == id)
+                .Include(dk => dk.SinhVien) // Kèm thông tin sinh viên
+                .Select(dk => new
+                {
+                    dk.Id, // Mã đăng ký
+                    dk.SinhVien.HoTen,
+                    dk.SinhVien.MSSV,
+                    dk.SinhVien.Lop,
+                    dk.NgayDangKy,
+                    dk.TrangThai // DaDangKy, DaCheckIn...
+                })
+                .ToListAsync();
+
+            return Ok(list);
+        }
+        // 4. API DUYỆT / CHECK-IN CHO SINH VIÊN
+        [HttpPost("checkin/{dangKyId}")]
+        public async Task<IActionResult> CheckIn(int dangKyId)
+        {
+            var dk = await _context.DangKyHoatDongs.FindAsync(dangKyId);
+            if (dk == null) return NotFound();
+
+            dk.TrangThai = "DaThamGia"; // Đổi trạng thái
+            dk.ThoiGianCheckIn = DateTime.Now;
+
+            // Cộng điểm cho sinh viên (Logic quan trọng)
+            var hd = await _context.HoatDongs.FindAsync(dk.HoatDongId);
+            var sv = await _context.SinhViens.FindAsync(dk.SinhVienId);
+
+            if (hd != null && sv != null)
+            {
+                sv.DiemRenLuyenTichLuy += (int)hd.DiemCong; // Cộng điểm tích lũy
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Check-in thành công, đã cộng điểm!" });
+        }
     }
+
 }
