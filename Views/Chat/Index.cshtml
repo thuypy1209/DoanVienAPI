@@ -24,64 +24,62 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
-    // 1. Khởi tạo kết nối
-    const connection = new signalr.HubConnectionBuilder()
-        .withUrl("/chathub") // Đường dẫn khớp với Program.cs
+// 1. Khai báo biến ở phạm vi toàn cục (không để trong hàm khác)
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chathub")
+        .withAutomaticReconnect()
         .build();
 
-    // 2. Hàm nhận tin nhắn từ Server (App Mobile gửi lên hoặc Admin gửi)
-    connection.on("ReceiveMessage", function (user, message) {
+    // 2. Lắng nghe tin nhắn từ Server
+    connection.on("ReceiveMessage", function (data) {
         const msgList = document.getElementById("messagesList");
-
-        // Xóa dòng "Chưa có tin nhắn" nếu có
         if (msgList.innerText.trim() === "Chưa có tin nhắn nào...") {
             msgList.innerHTML = "";
         }
 
-        // Tạo bong bóng chat
+        const isMe = data.user === "Admin" || data.user === "Quản trị viên";
         const div = document.createElement("div");
-        const isMe = user === "Admin";
-
-        div.className = isMe ? "text-end mb-2" : "text-start mb-2";
+        div.className = isMe ? "text-end mb-3" : "text-start mb-3";
 
         div.innerHTML = `
-            <div class="d-inline-block p-2 rounded ${isMe ? 'bg-primary text-white' : 'text-dark border bg-white'}" style="max-width: 75%;">
-                <div class="small fw-bold ${isMe ? 'text-white-50' : 'text-primary'}">${user}</div>
-                <div>${message}</div>
+            <div class="d-inline-block p-2 rounded ${isMe ? 'bg-primary text-white' : 'text-dark border bg-white'}" style="max-width: 80%;">
+                <div class="small fw-bold mb-1">${data.user}</div>
+                <div>${data.message}</div>
             </div>
         `;
 
         msgList.appendChild(div);
-        msgList.scrollTop = msgList.scrollHeight; // Tự cuộn xuống cuối
+        msgList.scrollTop = msgList.scrollHeight;
     });
 
-    // 3. Bắt đầu kết nối
-    connection.start().then(function () {
-        document.getElementById("sendButton").disabled = false;
-        console.log("Đã kết nối SignalR Web!");
-    }).catch(function (err) {
-        return console.error(err.toString());
-    });
+    // 3. Khởi động kết nối
+    connection.start()
+        .then(() => console.log("✅ SignalR Connected!"))
+        .catch(err => console.error("❌ Connection Error: ", err));
 
-    // 4. Sự kiện bấm nút Gửi
-    document.getElementById("sendButton").addEventListener("click", function (event) {
-        const user = document.getElementById("userInput").value;
-        const message = document.getElementById("messageInput").value;
+    // 4. Xử lý gửi tin nhắn (Đảm bảo đoạn này nằm sau khi khai báo connection)
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value;
 
-        if(message.trim() !== "") {
-            // Gọi hàm SendMessage bên Backend (ChatHub.cs)
-            connection.invoke("SendMessage", user, message).catch(function (err) {
-                return console.error(err.toString());
-            });
-            document.getElementById("messageInput").value = ""; // Xóa ô nhập
+        if (message.trim() !== "") {
+            // Gọi hàm SendMessage trong ChatHub.cs
+            connection.invoke("SendMessage", message).catch(err => console.error(err));
+            input.value = "";
         }
+    }
+
+    // Gán sự kiện cho nút bấm
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        sendMessage();
         event.preventDefault();
     });
 
-    // Hỗ trợ bấm Enter để gửi
+    // Gán sự kiện phím Enter
     document.getElementById("messageInput").addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            document.getElementById("sendButton").click();
+            sendMessage();
+            event.preventDefault();
         }
     });
 </script>

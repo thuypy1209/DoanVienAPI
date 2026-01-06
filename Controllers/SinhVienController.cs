@@ -56,50 +56,35 @@ namespace DoanVienAPI.Controllers
         {
             try
             {
-                // 1. Kiểm tra file có tồn tại không
-                if (file == null || file.Length == 0)
-                {
-                    return BadRequest("Vui lòng chọn file ảnh.");
-                }
+                if (file == null || file.Length == 0) return BadRequest("Vui lòng chọn file.");
 
-                // 2. Lấy ID sinh viên từ Token
-                var userId = User.FindFirst("Id")?.Value;
-                if (string.IsNullOrEmpty(userId)) return Unauthorized();
+                // 👇 SỬA: Dùng MSSV cho đồng bộ với GetMe
+                var mssvClaim = User.Claims.FirstOrDefault(c => c.Type == "MSSV");
+                if (mssvClaim == null) return Unauthorized();
+                string mssv = mssvClaim.Value;
 
-                // 3. Tạo đường dẫn lưu file
-                // Ảnh sẽ lưu trong thư mục: wwwroot/uploads/avatars
+                // Tìm User theo MSSV
+                var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.MSSV == mssv);
+                if (sinhVien == null) return NotFound("Không tìm thấy sinh viên.");
+
+                // ... (Đoạn lưu file giữ nguyên) ...
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
-
-                // Tạo thư mục nếu chưa có
                 if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                // Tạo tên file độc nhất (tránh trùng tên)
                 var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                // 4. Lưu file vào ổ cứng Server
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                 }
 
-                // 5. Cập nhật đường dẫn ảnh vào Database
-                var sinhVien = _context.SinhViens.FirstOrDefault(s => s.Id.ToString() == userId);
-                if (sinhVien != null)
-                {
-                    // Lưu đường dẫn tương đối để sau này dễ hiển thị
-                    // Ví dụ: /uploads/avatars/abc-123.jpg
-                    string relativePath = $"/uploads/avatars/{uniqueFileName}";
-                    sinhVien.AvatarUrl = relativePath;
+                // Cập nhật DB
+                string relativePath = $"/uploads/avatars/{uniqueFileName}";
+                sinhVien.AvatarUrl = relativePath;
+                _context.SinhViens.Update(sinhVien);
+                await _context.SaveChangesAsync();
 
-                    _context.SinhViens.Update(sinhVien);
-                    await _context.SaveChangesAsync();
-
-                    // 6. Trả về đường dẫn ảnh mới cho App hiển thị
-                    return Ok(new { message = "Upload thành công", avatarUrl = relativePath });
-                }
-
-                return NotFound("Không tìm thấy sinh viên.");
+                return Ok(new { message = "Upload thành công", avatarUrl = relativePath });
             }
             catch (Exception ex)
             {

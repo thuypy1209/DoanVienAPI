@@ -18,10 +18,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         builder => builder
-            .WithOrigins("http://localhost:7114", "http://0.0.0.0:5500", "null")
+            .SetIsOriginAllowed(_ => true) 
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials());
+            .AllowCredentials()); 
 });
 
 builder.Services.AddSwaggerGen(option =>
@@ -59,10 +59,11 @@ builder.Services.AddSwaggerGen(option =>
 // --- 2. CẤU HÌNH CẢ COOKIE (CHO WEB) VÀ JWT (CHO APP) ---
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; 
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
-.AddCookie(options =>
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
@@ -105,10 +106,14 @@ var app = builder.Build();
 // 2. CẤU HÌNH SWAGGER
 if (app.Environment.IsDevelopment())
 {
+    app.UseStaticFiles();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+else
+{
+    app.UseHttpsRedirection();
+}
 // 3. CÁC API
 app.MapGet("/api/sinhvien", async (AppDbContext db) =>
     await db.SinhViens.ToListAsync());
@@ -120,7 +125,6 @@ app.MapPost("/api/sinhvien", async (AppDbContext db, SinhVien sv) =>
     return Results.Ok(sv);
 });
 // Middleware
-app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 app.UseRouting();
 

@@ -187,46 +187,85 @@ namespace DoanVienAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Check-in thành công, đã cộng điểm!" });
         }
+        [AllowAnonymous]
         [HttpGet("qr/{id}")]
         public IActionResult GenerateQRCode(int id)
         {
-            // 1. Lấy thông tin hoạt động từ Database
-            var hoatDong = _context.HoatDongs.FirstOrDefault(h => h.Id == id);
+            
+            var hoatDong = _context.HoatDongs.AsNoTracking().FirstOrDefault(h => h.Id == id);
 
             if (hoatDong == null)
             {
                 return NotFound(new { message = "Không tìm thấy hoạt động" });
             }
 
-            // 2. Đóng gói dữ liệu muốn lưu vào QR
-            // Lưu ý: Đặt tên biến ngắn gọn (id, ten, time) để QR đỡ bị dày đặc
+            
             var dataQR = new
             {
                 id = hoatDong.Id,
-                ten = hoatDong.TenHoatDong,
-                diaDiem = hoatDong.DiaDiem,
-                // Format ngày giờ cho đẹp
-                time = hoatDong.ThoiGianBatDau.ToString("HH:mm dd/MM/yyyy")
+                type = "CHECKIN_ACTIVITY", 
+                ten = hoatDong.TenHoatDong
             };
 
-            // 3. Chuyển Object thành chuỗi JSON
-            // Ví dụ: {"id":4,"ten":"Rung Chuông Vàng","diaDiem":"Hội trường A","time":"13:30 05/10/2025"}
             string payload = JsonSerializer.Serialize(dataQR);
 
-            // 4. Tạo hình ảnh QR
+
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
             {
-                // ECCLevel.Q (Quarter): Chịu lỗi 25%, giúp quét nhanh hơn
+                
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
-
                 PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
-
-                // 20 pixels per module -> Ảnh nét, to rõ
                 byte[] qrCodeBytes = qrCode.GetGraphic(20);
-
-                // Trả về file ảnh PNG
                 return File(qrCodeBytes, "image/png");
             }
+        }
+        [HttpPost("checkin-by-activity/{hoatDongId}")]
+        public async Task<IActionResult> CheckInByActivity(int hoatDongId)
+        {
+
+            var userIdString = User.FindFirst("Id")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized("Token lỗi.");
+            int sinhVienId = int.Parse(userIdString);
+            var hd = await _context.HoatDongs.FindAsync(hoatDongId);
+            if (hd == null) return NotFound(new { message = "Hoạt động không tồn tại" });
+
+            var dangKy = await _context.DangKyHoatDongs
+                .FirstOrDefaultAsync(dk => dk.SinhVienId == sinhVienId && dk.HoatDongId == hoatDongId);
+
+            if (dangKy != null)
+            {
+                if (dangKy.TrangThai == "DaThamGia")
+                {
+                    return BadRequest(new { message = "Bạn đã check-in rồi!" });
+                }
+
+                dangKy.TrangThai = "DaThamGia";
+                dangKy.ThoiGianCheckIn = DateTime.Now;
+            }
+            else
+            {
+                dangKy = new DangKyHoatDong
+                {
+                    SinhVienId = sinhVienId,
+                    HoatDongId = hoatDongId,
+                    NgayDangKy = DateTime.Now,
+                    ThoiGianCheckIn = DateTime.Now,
+                    TrangThai = "DaThamGia"
+                };
+                _context.DangKyHoatDongs.Add(dangKy);
+            }
+
+            // 4. Cộng điểm cho sinh viên
+            var sv = await _context.SinhViens.FindAsync(sinhVienId);
+            if (sv != null)
+            {
+                sv.DiemRenLuyenTichLuy += (int)hd.DiemCong;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Check-in thành công! Cộng {hd.DiemCong} điểm." });
         }
     }
 

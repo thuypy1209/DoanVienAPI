@@ -8,7 +8,7 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -19,6 +19,15 @@
                         <label class="form-label fw-bold">Địa điểm</label>
                         <input asp-for="DiaDiem" class="form-control" placeholder="Ví dụ: Sảnh A, Hội trường..." required />
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình ảnh hoạt động</label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                        <div class="mt-2">
+                            <img id="imagePreview" src="/images/activites/no-image.png" class="img-thumbnail" style="max-height: 150px; display: block;" />
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Thời gian Bắt đầu</label>
@@ -46,7 +55,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Mô tả chi tiết</label>
-                        <textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Nội dung hoạt động..."></textarea>
+                        <textarea asp-for="MoTa" class="form-control" rows="6" placeholder="Nội dung hoạt động..."></textarea>
                     </div>
                 </div>
             </div>
@@ -57,3 +66,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/activity-upload.js" asp-append-version="true"></script>
+}

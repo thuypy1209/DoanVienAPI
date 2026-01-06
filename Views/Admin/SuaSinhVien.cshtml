@@ -6,41 +6,55 @@
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-success text-white">
-            <h4 class="mb-0">Sửa Sinh viên mới</h4>
+            <h4 class="mb-0">Sửa Sinh viên: @Model.HoTen</h4>
         </div>
         <div class="card-body">
             <form asp-action="SuaSinhVien">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="HoTen" />
+                <input type="hidden" asp-for="MSSV" />
+                <input type="hidden" asp-for="Khoa" />
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">MSSV</label>
-                        <input asp-for="MSSV" class="form-control" required />
-                        <span asp-validation-for="MSSV" class="text-danger"></span>
+                        <input asp-for="MSSV" class="form-control bg-light" readonly />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Họ và tên</label>
-                        <input asp-for="HoTen" class="form-control" required />
+                        <input asp-for="HoTen" class="form-control bg-light" readonly />
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Lớp</label>
-                        <input asp-for="Lop" class="form-control" />
+                        <label class="form-label fw-bold text-primary">Lớp</label>
+                        <input asp-for="Lop" class="form-control border-primary" required />
+                        <span asp-validation-for="Lop" class="text-danger"></span>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Khoa</label>
-                        <input asp-for="Khoa" class="form-control" />
+                        <label class="form-label fw-bold text-primary">Email</label>
+                        <input asp-for="Email" class="form-control border-primary" required type="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="text-end">
-                    <a asp-action="SinhVien" class="btn btn-secondary">Hủy</a>
-                    <button type="submit" class="btn btn-success px-4">Lưu lại</button>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Khoa</label>
+                        <input asp-for="Khoa" class="form-control bg-light" readonly />
+                    </div>
+                </div>
+
+                <div class="mt-3 text-end">
+                    <a asp-action="SinhVien" class="btn btn-secondary">Quay lại</a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-save"></i> Lưu thay đổi
+                    </button>
                 </div>
             </form>
-            <input type="hidden" asp-for="Id" />
         </div>
     </div>
 </div>
