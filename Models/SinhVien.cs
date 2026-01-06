@@ -13,6 +13,7 @@ namespace DoanVienAPI.Models
         public string? Khoa { get; set; }
         public string? Email { get; set; }
         public int DiemRenLuyenTichLuy { get; set; } = 0;
+        public string? AvatarUrl { get; set; }
 
         public ICollection<DangKyHoatDong> DanhSachThamGia { get; set; } = new List<DangKyHoatDong>();
     }

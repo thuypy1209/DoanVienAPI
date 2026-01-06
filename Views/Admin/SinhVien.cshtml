@@ -19,6 +19,7 @@
                     <th>Họ tên</th>
                     <th>Lớp</th>
                     <th>Khoa</th>
+                    <th>Email</th>
                     <th>Điểm RL</th>
                     <th class="text-center">Hành động</th>
                 </tr>
@@ -31,6 +32,7 @@
                             <td>@item.HoTen</td>
                             <td>@item.Lop</td>
                             <td>@item.Khoa</td>
+                            <td>@item.Email</td>
                             <td class="fw-bold text-danger">@item.DiemRenLuyenTichLuy</td>
                             <td class="text-center">
                                 <a asp-action="SuaSinhVien" asp-route-id="@item.Id" class="btn btn-sm btn-warning">

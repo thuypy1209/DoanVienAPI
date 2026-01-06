@@ -14,7 +14,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
 builder.Services.AddEndpointsApiExplorer();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder
+            .WithOrigins("http://localhost:7114", "http://0.0.0.0:5500", "null")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -51,7 +59,7 @@ builder.Services.AddSwaggerGen(option =>
 // --- 2. CẤU HÌNH CẢ COOKIE (CHO WEB) VÀ JWT (CHO APP) ---
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Mặc định là Web Admin
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; 
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
@@ -71,6 +79,20 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+           
+            var accessToken = context.Request.Query["access_token"];  
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 // 2. CẤU HÌNH SIGNALR (SOCKET)
@@ -102,6 +124,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 app.UseRouting();
 
+app.UseCors("AllowAll");
 
 //Authentication & Authorization
 app.UseAuthentication(); 
@@ -116,3 +139,4 @@ app.MapControllers();
 app.MapHub<DoanVienAPI.Hubs.ChatHub>("/chathub");
 // Chạy ứng dụng
 app.Run("http://0.0.0.0:5000");
+    

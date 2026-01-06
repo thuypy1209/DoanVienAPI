@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DoanVienAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using QRCoder;
+using System.Text.Json;   
+using System.Drawing;
 
 namespace DoanVienAPI.Controllers
 {
@@ -94,11 +97,14 @@ namespace DoanVienAPI.Controllers
                 .OrderByDescending(dk => dk.NgayDangKy)
                 .Select(dk => new
                 {
+                    id = dk.Id,
+                    hoatDongId = dk.HoatDongId,
                     dk.HoatDong.TenHoatDong,
                     dk.HoatDong.DiaDiem,
                     ThoiGian = dk.HoatDong.ThoiGianBatDau,
                     dk.TrangThai,
-                    dk.HoatDong.DiemCong
+                    dk.HoatDong.DiemCong,
+                    ImageUrl = dk.HoatDong.ImageUrl
                 })
                 .ToListAsync();
 
@@ -121,6 +127,9 @@ namespace DoanVienAPI.Controllers
             hd.ThoiGianKetThuc = model.ThoiGianKetThuc;
             hd.DiemCong = model.DiemCong;
             hd.TrangThai = model.TrangThai;
+
+            hd.ImageUrl = model.ImageUrl;
+
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật thành công!" });
@@ -177,6 +186,47 @@ namespace DoanVienAPI.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Check-in thành công, đã cộng điểm!" });
+        }
+        [HttpGet("qr/{id}")]
+        public IActionResult GenerateQRCode(int id)
+        {
+            // 1. Lấy thông tin hoạt động từ Database
+            var hoatDong = _context.HoatDongs.FirstOrDefault(h => h.Id == id);
+
+            if (hoatDong == null)
+            {
+                return NotFound(new { message = "Không tìm thấy hoạt động" });
+            }
+
+            // 2. Đóng gói dữ liệu muốn lưu vào QR
+            // Lưu ý: Đặt tên biến ngắn gọn (id, ten, time) để QR đỡ bị dày đặc
+            var dataQR = new
+            {
+                id = hoatDong.Id,
+                ten = hoatDong.TenHoatDong,
+                diaDiem = hoatDong.DiaDiem,
+                // Format ngày giờ cho đẹp
+                time = hoatDong.ThoiGianBatDau.ToString("HH:mm dd/MM/yyyy")
+            };
+
+            // 3. Chuyển Object thành chuỗi JSON
+            // Ví dụ: {"id":4,"ten":"Rung Chuông Vàng","diaDiem":"Hội trường A","time":"13:30 05/10/2025"}
+            string payload = JsonSerializer.Serialize(dataQR);
+
+            // 4. Tạo hình ảnh QR
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                // ECCLevel.Q (Quarter): Chịu lỗi 25%, giúp quét nhanh hơn
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
+
+                PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+
+                // 20 pixels per module -> Ảnh nét, to rõ
+                byte[] qrCodeBytes = qrCode.GetGraphic(20);
+
+                // Trả về file ảnh PNG
+                return File(qrCodeBytes, "image/png");
+            }
         }
     }
 

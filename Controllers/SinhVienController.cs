@@ -1,4 +1,5 @@
 ﻿using DoanVienAPI.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace DoanVienAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class SinhVienController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -17,8 +19,6 @@ namespace DoanVienAPI.Controllers
             _context = context;
         }
 
-        // Thêm API này để test:
-        [Authorize] // <--- Bắt buộc phải có Token mới gọi được
         [HttpGet("me")]
         public async Task<IActionResult> GetMe()
         {
@@ -50,6 +50,61 @@ namespace DoanVienAPI.Controllers
                 sv.Email,
                 sv.DiemRenLuyenTichLuy
             });
+        }
+        [HttpPost("upload-avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            try
+            {
+                // 1. Kiểm tra file có tồn tại không
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("Vui lòng chọn file ảnh.");
+                }
+
+                // 2. Lấy ID sinh viên từ Token
+                var userId = User.FindFirst("Id")?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+                // 3. Tạo đường dẫn lưu file
+                // Ảnh sẽ lưu trong thư mục: wwwroot/uploads/avatars
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+
+                // Tạo thư mục nếu chưa có
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                // Tạo tên file độc nhất (tránh trùng tên)
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // 4. Lưu file vào ổ cứng Server
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                // 5. Cập nhật đường dẫn ảnh vào Database
+                var sinhVien = _context.SinhViens.FirstOrDefault(s => s.Id.ToString() == userId);
+                if (sinhVien != null)
+                {
+                    // Lưu đường dẫn tương đối để sau này dễ hiển thị
+                    // Ví dụ: /uploads/avatars/abc-123.jpg
+                    string relativePath = $"/uploads/avatars/{uniqueFileName}";
+                    sinhVien.AvatarUrl = relativePath;
+
+                    _context.SinhViens.Update(sinhVien);
+                    await _context.SaveChangesAsync();
+
+                    // 6. Trả về đường dẫn ảnh mới cho App hiển thị
+                    return Ok(new { message = "Upload thành công", avatarUrl = relativePath });
+                }
+
+                return NotFound("Không tìm thấy sinh viên.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi Server: {ex.Message}");
+            }
         }
     }
 }

@@ -56,7 +56,7 @@ namespace DoanVienAPI.Controllers
             {
                 _context.Add(hoatDong);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(HoatDong));
             }
             return View(hoatDong);
         }
@@ -90,7 +90,7 @@ namespace DoanVienAPI.Controllers
                     if (!_context.HoatDongs.Any(e => e.Id == id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Index)); // Sửa xong quay về danh sách
+                return RedirectToAction(nameof(HoatDong)); // Sửa xong quay về danh sách
             }
             return View(hoatDong);
         }
@@ -109,7 +109,7 @@ namespace DoanVienAPI.Controllers
                 _context.HoatDongs.Remove(hd);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(HoatDong));
         }
         // 3. Trang Chi tiết (Xem danh sách sinh viên đăng ký)
         public async Task<IActionResult> Details(int id)

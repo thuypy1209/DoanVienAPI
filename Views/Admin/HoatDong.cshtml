@@ -4,6 +4,8 @@
     ViewData["Title"] = "Danh sách Hoạt động";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Danh sách Hoạt động</h1>
     <a asp-action="Create" class="btn btn-success fw-bold">+ Tạo mới</a>
@@ -18,44 +20,81 @@
             <th>Địa điểm</th>
             <th>Điểm</th>
             <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th style="width: 250px;">Hành động</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td class="text-center">@item.Id</td>
-                <td class="fw-bold text-primary">@item.TenHoatDong</td>
-                <td>
-                    <div class="small">Bắt đầu: @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
-                    <div class="small text-muted">Kết thúc: @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
-                </td>
-                <td>@item.DiaDiem</td>
-                <td class="fw-bold text-danger text-center">+@item.DiemCong</td>
-                <td class="text-center">
+                <tr>
+                    <td class="text-center">@item.Id</td>
+                    <td class="fw-bold text-primary">@item.TenHoatDong</td>
+                    <td>
+                        <div class="small">Bắt đầu: @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div class="small text-muted">Kết thúc: @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
+                    </td>
+                    <td>@item.DiaDiem</td>
+                    <td class="fw-bold text-danger text-center">+@item.DiemCong</td>
+                    <td class="text-center">
                     @if (item.TrangThai == "SapDienRa")
                     {
-                            <span class="badge bg-warning text-dark">Sắp diễn ra</span>
+                                <span class="badge bg-warning text-dark">Sắp diễn ra</span>
                     }
                     else if (item.TrangThai == "DangDienRa")
                     {
-                            <span class="badge bg-success">Đang diễn ra</span>
+                                <span class="badge bg-success">Đang diễn ra</span>
                     }
                     else
                     {
-                            <span class="badge bg-secondary">Đã kết thúc</span>
+                                <span class="badge bg-secondary">Đã kết thúc</span>
                     }
-                </td>
-                <td class="text-center">
-                    <a asp-action="Details" asp-route-id="@item.Id"
-                        class="btn btn-sm btn-info text-white">Xem Chi Tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.Id" 
-                        class="btn btn-sm btn-outline-primary">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" 
-                        class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Xóa</a>
-                </td>
-            </tr>
+                    </td>
+                    <td class="text-center">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white" title="Chi tiết">
+                            <i class="fa fa-eye"></i>
+                        </a>
+
+                        <button class="btn btn-sm btn-dark" 
+                                onclick="showQrCode(@item.Id, '@item.TenHoatDong')" 
+                                title="Lấy mã QR">
+                            <i class="fa fa-qrcode"></i> QR
+                        </button>
+
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Sửa">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa?');" title="Xóa">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
         }
-</tbody>
+    </tbody>
 </table>
+
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="qrTitle">Mã QR Điểm danh</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="bg-light d-inline-block rounded border p-3">
+                    <img id="qrImage" src="" alt="QR Code" style="width: 250px; height: 250px; object-fit: contain;">
+                </div>
+                <p class="text-muted fst-italic mt-3">Sử dụng App Đoàn Viên để quét mã này.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="printQr()">
+                    <i class="fa fa-print"></i> In mã
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script src="~/js/activity-qr.js" asp-append-version="true"></script>
+}
