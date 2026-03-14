@@ -70,35 +70,15 @@ DoanVienAPI/
 │   ├── AuthController.cs
 │   ├── DoanVienController.cs
 │   └── ...
-│
 ├── Models/               # Các Entity ánh xạ với bảng trong database
 │   ├── SinhVien.cs
-│   ├── .cs
-│   └── .cs
-│
-├── DTOs/                 # Data Transfer Object cho request/response
-│   ├── LoginDTO.cs
-│   ├── RegisterDTO.cs
-│   └── DoanVienDTO.cs
-│
+│   ├── HoatDong.cs
+│   └── ...
 ├── Data/                 # Cấu hình DbContext và kết nối database
-│   └── ApplicationDbContext.cs
-│
-├── Services/             # Xử lý logic nghiệp vụ
-│   ├── AuthService.cs
-│   └── DoanVienService.cs
-│
-├── Repositories/         # Tầng truy cập dữ liệu (Repository Pattern)
-│   ├── IGenericRepository.cs
-│   └── GenericRepository.cs
-│
+│   └── AppDbContext.cs
 ├── Migrations/           # Entity Framework Migrations
-│
-├── Configurations/       # Cấu hình JWT, CORS, Middleware
-│
 ├── Program.cs            # Entry point của ứng dụng
 ├── appsettings.json      # Cấu hình database và hệ thống
-├── appsettings.Development.json
 └── DoanVienAPI.csproj    # File cấu hình project .NET
 ```
 
