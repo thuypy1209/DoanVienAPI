@@ -1,0 +1,51 @@
+﻿@model IEnumerable<DoanVienAPI.Models.SinhVien>
+@{
+    ViewData["Title"] = "Quản lý Sinh viên";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">👨‍🎓 Danh sách Sinh viên</h2>
+    <a asp-action="SinhVienCreate" class="btn btn-success shadow-sm">
+        <i class="bi bi-person-plus-fill"></i> + Thêm Sinh viên
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table-hover table-striped mb-0 table align-middle">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>MSSV</th>
+                    <th>Họ tên</th>
+                    <th>Lớp</th>
+                    <th>Khoa</th>
+                    <th>Email</th>
+                    <th>Điểm RL</th>
+                    <th class="text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                        <tr>
+                            <td class="fw-bold">@item.MSSV</td>
+                            <td>@item.HoTen</td>
+                            <td>@item.Lop</td>
+                            <td>@item.Khoa</td>
+                            <td>@item.Email</td>
+                            <td class="fw-bold text-danger">@item.DiemRenLuyenTichLuy</td>
+                            <td class="text-center">
+                                <a asp-action="SuaSinhVien" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </a>
+                                <a asp-action="SinhVienDelete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Xóa sinh viên này?');">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </a>
+                            </td>
+                        </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

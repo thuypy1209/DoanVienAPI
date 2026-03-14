@@ -1,0 +1,6 @@
+﻿namespace DoanVienAPI.wwwroot.image
+{
+    public class no_image
+    {
+    }
+}

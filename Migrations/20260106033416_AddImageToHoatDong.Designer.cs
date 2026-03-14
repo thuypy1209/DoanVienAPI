@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DoanVienAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251226110636_AddPasswordColumn")]
-    partial class AddPasswordColumn
+    [Migration("20260106033416_AddImageToHoatDong")]
+    partial class AddImageToHoatDong
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

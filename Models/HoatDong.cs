@@ -20,5 +20,6 @@ namespace DoanVienAPI.Models
 
         // Trạng thái: Sắp diễn ra, Đang diễn ra, Đã kết thúc
         public string TrangThai { get; set; } = "SapDienRa";
+        public string? ImageUrl { get; set; }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DoanVienAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251226110636_AddPasswordColumn")]
-    partial class AddPasswordColumn
+    [Migration("20260106065947_ThemCotAvatarUrl")]
+    partial class ThemCotAvatarUrl
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,6 +79,9 @@ namespace DoanVienAPI.Migrations
                     b.Property<int>("DiemCong")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MoTa")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -109,6 +112,9 @@ namespace DoanVienAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DiemRenLuyenTichLuy")
                         .HasColumnType("int");

@@ -1,4 +1,5 @@
-﻿using DoanVienAPI.Models;
+﻿using DoanVienAPI.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace DoanVienAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class SinhVienController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -17,8 +19,6 @@ namespace DoanVienAPI.Controllers
             _context = context;
         }
 
-        // Thêm API này để test:
-        [Authorize] // <--- Bắt buộc phải có Token mới gọi được
         [HttpGet("me")]
         public async Task<IActionResult> GetMe()
         {
@@ -50,6 +50,46 @@ namespace DoanVienAPI.Controllers
                 sv.Email,
                 sv.DiemRenLuyenTichLuy
             });
+        }
+        [HttpPost("upload-avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0) return BadRequest("Vui lòng chọn file.");
+
+                // 👇 SỬA: Dùng MSSV cho đồng bộ với GetMe
+                var mssvClaim = User.Claims.FirstOrDefault(c => c.Type == "MSSV");
+                if (mssvClaim == null) return Unauthorized();
+                string mssv = mssvClaim.Value;
+
+                // Tìm User theo MSSV
+                var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.MSSV == mssv);
+                if (sinhVien == null) return NotFound("Không tìm thấy sinh viên.");
+
+                // ... (Đoạn lưu file giữ nguyên) ...
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                // Cập nhật DB
+                string relativePath = $"/uploads/avatars/{uniqueFileName}";
+                sinhVien.AvatarUrl = relativePath;
+                _context.SinhViens.Update(sinhVien);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Upload thành công", avatarUrl = relativePath });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi Server: {ex.Message}");
+            }
         }
     }
 }

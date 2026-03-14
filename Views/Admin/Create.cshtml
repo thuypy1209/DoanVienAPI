@@ -1,0 +1,72 @@
+﻿@model HoatDong
+
+@{
+    ViewData["Title"] = "Thêm mới";
+}
+
+<h2 class="mb-4">Tạo Hoạt động mới</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên hoạt động</label>
+                        <input asp-for="TenHoatDong" class="form-control" placeholder="Nhập tên hoạt động..." required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Địa điểm</label>
+                        <input asp-for="DiaDiem" class="form-control" placeholder="Ví dụ: Sảnh A, Hội trường..." required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình ảnh hoạt động</label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                        <div class="mt-2">
+                            <img id="imagePreview" src="/images/activites/no-image.png" class="img-thumbnail" style="max-height: 150px; display: block;" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Thời gian Bắt đầu</label>
+                            <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Thời gian Kết thúc</label>
+                            <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Điểm cộng rèn luyện</label>
+                        <input asp-for="DiemCong" type="number" class="form-control" value="0" min="0" />
+                        <span asp-validation-for="DiemCong" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Trạng thái</label>
+                        <select asp-for="TrangThai" class="form-select">
+                            <option value="SapDienRa">Sắp diễn ra</option>
+                            <option value="DangDienRa">Đang diễn ra</option>
+                            <option value="DaKetThuc">Đã kết thúc</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả chi tiết</label>
+                        <textarea asp-for="MoTa" class="form-control" rows="6" placeholder="Nội dung hoạt động..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 text-end">
+                <a asp-action="Index" class="btn btn-secondary me-2">Quay lại</a>
+                <button type="submit" class="btn btn-primary px-4">Lưu hoạt động</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/activity-upload.js" asp-append-version="true"></script>
+}

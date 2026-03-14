@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
+using DoanVienAPI.Data;
 
 namespace DoanVienAPI.Controllers
 {
@@ -57,7 +58,9 @@ namespace DoanVienAPI.Controllers
             {
                 Message = "Đăng nhập thành công!",
                 Token = token,
-                HoTen = sinhVien.HoTen
+                HoTen = sinhVien.HoTen,
+                MSSV = sinhVien.MSSV,
+                Lop = sinhVien.Lop
             });
         }
         [HttpPost("register")]
@@ -84,12 +87,8 @@ namespace DoanVienAPI.Controllers
             {
                 MSSV = model.MSSV,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                HoTen = model.HoTen,
-
-                // --- THÊM DÒNG NÀY ---
+                HoTen = model.HoTen,               
                 Email = model.Email,
-                // ---------------------
-
                 Lop = model.Lop,
                 Khoa = model.Khoa,
                 DiemRenLuyenTichLuy = 0
@@ -106,18 +105,22 @@ namespace DoanVienAPI.Controllers
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-            // Các thông tin muốn lưu vào trong Token (Claims)
-            var claims = new[]
+          
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.HoTen),
-                new Claim("MSSV", user.MSSV) // Lưu thêm MSSV để dùng sau này
+                new Claim("MSSV", user.MSSV),
+                new Claim("Lop", user.Lop ?? ""), 
+                new Claim("Khoa", user.Khoa ?? ""),
+                new Claim("DiemRL", user.DiemRenLuyenTichLuy.ToString()),
+                new Claim("Email", user.Email ?? "")
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(2), // Token hết hạn sau 2 tiếng
+                Expires = DateTime.UtcNow.AddHours(30),
                 Issuer = jwtSettings["Issuer"],
                 Audience = jwtSettings["Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
