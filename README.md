@@ -2,58 +2,68 @@
 Hệ thống API phục vụ cho ứng dụng Quản lý Đoàn viên, xử lý logic nghiệp vụ, lưu trữ dữ liệu và bảo mật hệ thống.
 
 ### 🛠 Công nghệ sử dụng
-Framework: ASP.NET Core
 
-Database: SQL Server
+- Framework: ASP.NET Core
 
-ORM: Entity Framework Core
+- Database: SQL Server
 
-Authentication: JWT (JSON Web Token)
+- ORM: Entity Framework Core
 
-Real-time: SignalR
+- Authentication: JWT (JSON Web Token)
 
-Documentation: Swagger UI
+- Real-time: SignalR
+
+- Documentation: Swagger UI
 
 # 📖 API Endpoints chính
 
-Auth: /api/auth/login, /api/auth/register (Xác thực người dùng).
+- Auth: /api/auth/login, /api/auth/register (Xác thực người dùng).
 
-Sinh viên: /api/sinhvien (Lấy danh sách và thêm mới sinh viên).
+- Sinh viên: /api/sinhvien (Lấy danh sách và thêm mới sinh viên).
 
-Hoạt động: /api/hoatdong (Quản lý các hoạt động phong trào).
+- Hoạt động: /api/hoatdong (Quản lý các hoạt động phong trào).
 
 ### 🚀 Hướng dẫn cài đặt (Local)
-Clone dự án:
+1. Clone dự án:
 
-  Bash
-  
+```bash 
   git clone https://github.com/thuypy1209/DoanVienAPI.git
   
   cd DoanVienAPI
-  
-Cấu hình Database:
+
+  ```
+2. Cấu hình Database:
 
 Mở tệp appsettings.json và cập nhật chuỗi DefaultConnection phù hợp với SQL Server của bạn.
+``` bash
 
   JSON
   "ConnectionStrings": {
       "DefaultConnection": "Server=localhost;Database=QuanLyDoanVien;Trusted_Connection=True;..."
   }
 
-Khởi tạo Cơ sở dữ liệu:
+```
+3. Khởi tạo Cơ sở dữ liệu:
 
 Xóa thư mục Migrations hiện có 
 
 Chạy các lệnh sau trong Terminal:
 
-  Bash
-  
-  dotnet ef migrations add InitialCreate
-  
-  dotnet ef database update
-  
-Chạy ứng dụng:
 
-  Bash
-  
+``` bash
+
+  dotnet ef migrations add InitialCreate
+  dotnet ef database update
+
+```
+
+4. Chạy ứng dụng:
+
+``` bash
   dotnet run
+```
+
+
+
+
+  
