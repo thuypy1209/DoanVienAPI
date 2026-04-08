@@ -2,7 +2,7 @@
 {
     public class SendMessageModel
     {
-        public string SenderId { get; set; } // ID người gửi (MSSV)
-        public string Message { get; set; }  // Nội dung tin nhắn
+        public string SenderId { get; set; } = string.Empty; // ID người gửi (MSSV)
+        public string Message { get; set; } = string.Empty;  // Nội dung tin nhắn
     }
 }
