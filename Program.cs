@@ -6,6 +6,7 @@ using DoanVienAPI.Models;
 using Microsoft.OpenApi.Models;
 using DoanVienAPI.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,10 @@ builder.Services.AddSignalR();
 
 // 3. CẤU HÌNH CONTROLLERS
 builder.Services.AddControllersWithViews();
+
+//eplus
+ExcelPackage.License.SetNonCommercialPersonal("DoanVienAPI");
+
 var app = builder.Build();
 
 // 2. CẤU HÌNH SWAGGER
