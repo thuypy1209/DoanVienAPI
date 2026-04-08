@@ -4,59 +4,98 @@
     ViewData["Title"] = "Chi tiết hoạt động";
 }
 
-<div class="container mt-4">
-    <div class="card mb-4">
-        <div class="card-body bg-light">
-            <h2 class="text-primary">@hd?.TenHoatDong</h2>
-            <p><strong>Thời gian:</strong> @hd?.ThoiGianBatDau</p>
-            <p><strong>Địa điểm:</strong> @hd?.DiaDiem</p>
-            <a asp-action="HoatDong" class="btn btn-secondary">Quay lại danh sách</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-primary mb-1">@hd?.TenHoatDong</h2>
+        <div class="text-muted small">
+            <i class="fa fa-clock"></i> @hd?.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
+            &nbsp; | &nbsp;
+            <i class="fa fa-map-marker-alt"></i> @hd?.DiaDiem
         </div>
     </div>
 
-    <h4>Danh sách sinh viên đăng ký (@Model.Count)</h4>
+    <a asp-action="HoatDong" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Quay lại
+    </a>
+</div>
 
-    <table class="table-bordered table-hover mt-3 table">
-        <thead class="table-dark">
-            <tr>
-                <th>MSSV</th>
-                <th>Họ tên</th>
-                <th>Lớp</th>
-                <th>Ngày đăng ký</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Count == 0)
-            {
-                    <tr><td colspan="6" class="text-center">Chưa có ai đăng ký</td></tr>
-            }
-            @foreach (var item in Model)
-            {
-                    <tr>
-                        <td>@item.SinhVien?.MSSV</td>
-                        <td>@item.SinhVien?.HoTen</td>
-                        <td>@item.SinhVien?.Lop</td>
-                        <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
-                        @if (item.TrangThai == "DaThamGia")
-                        {
-                                    <span class="badge bg-success">Đã tham gia</span>
-                        }
-                        else
-                        {
-                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
-                        }
-                        </td>
-                        <td>
-                        @if (item.TrangThai != "DaThamGia")
-                        {
-                                    <a asp-action="ConfirmCheckIn" asp-route-id="@item.Id" class="btn btn-success btn-sm">✅ Duyệt / Check-in</a>
-                        }
-                        </td>
-                    </tr>
-            }
-        </tbody>
-    </table>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">
+                Danh sách sinh viên đăng ký
+                <span class="badge bg-primary">@Model.Count</span>
+            </h5>
+        </div>
+
+        <table class="table-hover table-bordered table align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>MSSV</th>
+                    <th>Họ tên</th>
+                    <th>Lớp</th>
+                    <th>Ngày đăng ký</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 180px;">Hành động</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                        <tr>
+                            <td colspan="6" class="text-muted fst-italic text-center">
+                                Chưa có sinh viên đăng ký
+                            </td>
+                        </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                                <tr>
+                                    <td class="fw-bold text-center">@item.SinhVien?.MSSV</td>
+                                    <td>@item.SinhVien?.HoTen</td>
+                                    <td>@item.SinhVien?.Lop</td>
+                                    <td class="text-center">
+                                @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="text-center">
+                                @if (item.TrangThai == "DaThamGia")
+                                {
+                                                <span class="badge bg-success px-3 py-2">
+                                                    ✔ Đã tham gia
+                                                </span>
+                                }
+                                else
+                                {
+                                                <span class="badge bg-warning text-dark px-3 py-2">
+                                                    ⏳ Chờ duyệt
+                                                </span>
+                                }
+                                    </td>
+
+                                    <td class="text-center">
+                                @if (item.TrangThai != "DaThamGia")
+                                {
+                                                <a asp-action="ConfirmCheckIn"
+                                                   asp-route-id="@item.Id"
+                                                   class="btn btn-success btn-sm">
+                                                    <i class="fa fa-check"></i> Check-in
+                                                </a>
+                                }
+                                else
+                                {
+                                                <span class="text-muted small">Đã xử lý</span>
+                                }
+                                    </td>
+                                </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+    </div>
 </div>

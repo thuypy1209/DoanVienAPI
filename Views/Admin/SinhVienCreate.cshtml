@@ -1,0 +1,90 @@
+﻿@model DoanVienAPI.Models.SinhVien
+
+@{
+    ViewData["Title"] = "Thêm Sinh viên";
+}
+
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+
+        <!-- HEADER -->
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">
+                <i class="fa fa-user-plus"></i> Thêm Sinh viên mới
+            </h4>
+        </div>
+
+        <!-- BODY -->
+        <div class="card-body">
+
+            <!-- THÔNG BÁO -->
+            @if (TempData["Error"] != null)
+            {
+                    <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <form asp-action="SinhVienCreate" method="post">
+
+                @Html.AntiForgeryToken() <!-- 🔥 FIX 405 -->
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row">
+                    <!-- MSSV -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">MSSV</label>
+                        <input asp-for="MSSV" class="form-control" placeholder="Nhập MSSV..." required />
+                        <span asp-validation-for="MSSV" class="text-danger"></span>
+                    </div>
+
+                    <!-- Họ tên -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Họ tên</label>
+                        <input asp-for="HoTen" class="form-control" placeholder="Nhập họ tên..." required />
+                        <span asp-validation-for="HoTen" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Lớp -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Lớp</label>
+                        <input asp-for="Lop" class="form-control" placeholder="VD: 21DTHA1..." required />
+                        <span asp-validation-for="Lop" class="text-danger"></span>
+                    </div>
+
+                    <!-- Khoa -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Khoa</label>
+                        <input asp-for="Khoa" class="form-control" placeholder="VD: CNTT..." required />
+                        <span asp-validation-for="Khoa" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email</label>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="example@gmail.com" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <!-- BUTTON -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="SinhVien" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Quay lại
+                    </a>
+
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fa fa-save"></i> Lưu
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

@@ -4,16 +4,49 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary">👨‍🎓 Danh sách Sinh viên</h2>
-    <a asp-action="SinhVienCreate" class="btn btn-success shadow-sm">
-        <i class="bi bi-person-plus-fill"></i> + Thêm Sinh viên
+    <h2 class="fw-bold text-primary">
+        <i class="fa fa-user-graduate"></i> Danh sách Sinh viên
+    </h2>
+
+    <a asp-action="SinhVienCreate" class="btn btn-success">
+        <i class="fa fa-user-plus"></i> Thêm Sinh viên
     </a>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <table class="table-hover table-striped mb-0 table align-middle">
-            <thead class="bg-primary text-white">
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+         <div class="d-flex mb-3 gap-2">
+            <a asp-action="ExportSinhVien" class="btn btn-success">
+                <i class="fa fa-file-excel"></i> Export Excel
+            </a>
+            <a asp-action="DownloadTemplateSinhVien" class="btn btn-info text-white">
+                <i class="fa fa-download"></i> Template
+            </a>
+            <form asp-action="ImportSinhVien" method="post" enctype="multipart/form-data" class="d-flex">
+                    @Html.AntiForgeryToken()
+                <input type="file" name="file" class="form-control me-2" accept=".xlsx" required />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-upload"></i> Import
+                </button>
+            </form>
+
+        </div>
+        @if (TempData["Success"] != null)
+        {
+        <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+        <!-- SEARCH -->
+        <div class="mb-3">
+            <input type="text" id="searchSinhVien" class="form-control"
+                   placeholder="🔍 Tìm theo MSSV, tên, lớp..." onkeyup="searchSinhVien()" />
+        </div>
+
+        <table class="table-hover table-bordered table align-middle">
+            <thead class="table-primary text-center">
                 <tr>
                     <th>MSSV</th>
                     <th>Họ tên</th>
@@ -21,31 +54,77 @@
                     <th>Khoa</th>
                     <th>Email</th>
                     <th>Điểm RL</th>
-                    <th class="text-center">Hành động</th>
+                    <th style="width: 180px;">Hành động</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var item in Model)
+
+            <tbody id="sinhVienTable">
+                @if (!Model.Any())
                 {
                         <tr>
-                            <td class="fw-bold">@item.MSSV</td>
-                            <td>@item.HoTen</td>
-                            <td>@item.Lop</td>
-                            <td>@item.Khoa</td>
-                            <td>@item.Email</td>
-                            <td class="fw-bold text-danger">@item.DiemRenLuyenTichLuy</td>
-                            <td class="text-center">
-                                <a asp-action="SuaSinhVien" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil-square"></i> Sửa
-                                </a>
-                                <a asp-action="SinhVienDelete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" 
-                                   onclick="return confirm('Xóa sinh viên này?');">
-                                    <i class="bi bi-trash"></i> Xóa
-                                </a>
+                            <td colspan="7" class="text-muted fst-italic text-center">
+                                Chưa có sinh viên
                             </td>
                         </tr>
                 }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                                <tr>
+                                    <td class="fw-bold text-center">@item.MSSV</td>
+
+                                    <td>
+                                        <i class="fa fa-user text-primary"></i>
+                                @item.HoTen
+                                    </td>
+
+                                    <td class="text-center">@item.Lop</td>
+
+                                    <td>@item.Khoa</td>
+
+                                    <td>
+                                        <i class="fa fa-envelope text-muted"></i>
+                                @item.Email
+                                    </td>
+
+                                    <td class="fw-bold text-danger text-center">
+                                @item.DiemRenLuyenTichLuy
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a asp-action="SuaSinhVien"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+
+                                        <a asp-action="SinhVienDelete"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Xóa sinh viên này?');">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                    }
+                }
             </tbody>
         </table>
+
     </div>
 </div>
+
+@section Scripts {
+        <script>
+            function searchSinhVien() {
+                let input = document.getElementById("searchSinhVien").value.toLowerCase();
+                let rows = document.querySelectorAll("#sinhVienTable tr");
+
+                rows.forEach(row => {
+                    let text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(input) ? "" : "none";
+                });
+            }
+        </script>
+}
