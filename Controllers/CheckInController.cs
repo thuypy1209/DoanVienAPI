@@ -38,6 +38,11 @@ namespace DoanVienAPI.Controllers
             // C. Kiểm tra hoạt động có tồn tại không
             var hoatDong = await _context.HoatDongs.FindAsync(hoatDongId);
             if (hoatDong == null) return NotFound("Hoạt động không tồn tại.");
+            var gioHienTai = DateTime.Now;
+            if (gioHienTai < hoatDong.ThoiGianBatDau || gioHienTai > hoatDong.ThoiGianKetThuc)
+            {
+                return BadRequest("Hoạt động này chưa bắt đầu hoặc đã kết thúc!");
+            }
 
             // D. Kiểm tra xem sinh viên đã đăng ký chưa
             var dangKy = await _context.DangKyHoatDongs
