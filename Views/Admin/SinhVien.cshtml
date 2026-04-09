@@ -5,126 +5,146 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold text-primary">
-        <i class="fa fa-user-graduate"></i> Danh sách Sinh viên
+        <i class="bi bi-mortarboard-fill"></i> Danh sách Sinh viên
     </h2>
 
-    <a asp-action="SinhVienCreate" class="btn btn-success">
-        <i class="fa fa-user-plus"></i> Thêm Sinh viên
+    <a asp-action="SinhVienCreate" class="btn btn-success rounded-pill shadow-sm">
+        <i class="bi bi-person-plus-fill"></i> Thêm Sinh viên
     </a>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-         <div class="d-flex mb-3 gap-2">
-            <a asp-action="ExportSinhVien" class="btn btn-success">
-                <i class="fa fa-file-excel"></i> Export Excel
-            </a>
-            <a asp-action="DownloadTemplateSinhVien" class="btn btn-info text-white">
-                <i class="fa fa-download"></i> Template
-            </a>
-            <form asp-action="ImportSinhVien" method="post" enctype="multipart/form-data" class="d-flex">
-                    @Html.AntiForgeryToken()
-                <input type="file" name="file" class="form-control me-2" accept=".xlsx" required />
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-upload"></i> Import
-                </button>
-            </form>
+<div class="card border-0 shadow-sm" style="border-radius: 15px;">
+    <div class="card-body p-4">
 
+        <div class="d-flex mb-4 flex-wrap gap-2">
+            <a asp-action="ExportSinhVien" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </a>
+            <a asp-action="DownloadTemplateSinhVien" class="btn btn-outline-info">
+                <i class="bi bi-download"></i> Tải Template
+            </a>
+
+            <div class="ms-md-auto">
+                <form asp-action="ImportSinhVien" method="post" enctype="multipart/form-data" class="d-flex rounded-pill overflow-hidden border shadow-sm">
+                    @Html.AntiForgeryToken()
+                    <input type="file" name="file" class="form-control border-0" accept=".xlsx" required style="border-radius: 0;" />
+                    <button type="submit" class="btn btn-primary px-3" style="border-radius: 0;">
+                        <i class="bi bi-cloud-upload"></i> Import
+                    </button>
+                </form>
+            </div>
         </div>
+
+        @* THÔNG BÁO *@
         @if (TempData["Success"] != null)
         {
-        <div class="alert alert-success">@TempData["Success"]</div>
+                <div class="alert alert-success border-0 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                </div>
         }
         @if (TempData["Error"] != null)
         {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+                <div class="alert alert-danger border-0 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+                </div>
         }
-        <!-- SEARCH -->
-        <div class="mb-3">
-            <input type="text" id="searchSinhVien" class="form-control"
-                   placeholder="🔍 Tìm theo MSSV, tên, lớp..." onkeyup="searchSinhVien()" />
+
+        <div class="row g-3 bg-light rounded-4 mx-0 mb-4 border p-3 shadow-sm">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">Lọc theo Khoa:</label>
+                <select id="filterKhoa" class="form-select" onchange="searchSinhVien()">
+                    <option value="">-- Tất cả các khoa --</option>
+                    @if (ViewBag.DanhSachKhoa != null)
+                    {
+                        foreach (var k in ViewBag.DanhSachKhoa)
+                        {
+                                    <option value="@k">@k</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted">Lớp:</label>
+                <input type="text" id="filterLop" class="form-control" placeholder="Nhập tên lớp..." onkeyup="searchSinhVien()">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted">Tìm kiếm nhanh:</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchSinhVienInput" class="form-control" placeholder="Mã số, tên, email..." onkeyup="searchSinhVien()" />
+                    <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <table class="table-hover table-bordered table align-middle">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>MSSV</th>
-                    <th>Họ tên</th>
-                    <th>Lớp</th>
-                    <th>Khoa</th>
-                    <th>Email</th>
-                    <th>Điểm RL</th>
-                    <th style="width: 180px;">Hành động</th>
-                </tr>
-            </thead>
-
-            <tbody id="sinhVienTable">
-                @if (!Model.Any())
-                {
-                        <tr>
-                            <td colspan="7" class="text-muted fst-italic text-center">
-                                Chưa có sinh viên
-                            </td>
-                        </tr>
-                }
-                else
-                {
-                    @foreach (var item in Model)
+        <div class="table-responsive">
+            <table class="table-hover border-top table align-middle">
+                <thead class="table-light">
+                    <tr class="text-secondary">
+                        <th class="ps-3">MSSV</th>
+                        <th>Họ tên</th>
+                        <th>Lớp / Khoa</th>
+                        <th>Email</th>
+                        <th class="text-center">Điểm RL</th>
+                        <th class="text-center" style="width: 120px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="sinhVienTable">
+                    @if (!Model.Any())
                     {
-                                <tr>
-                                    <td class="fw-bold text-center">@item.MSSV</td>
-
-                                    <td>
-                                        <i class="fa fa-user text-primary"></i>
-                                @item.HoTen
-                                    </td>
-
-                                    <td class="text-center">@item.Lop</td>
-
-                                    <td>@item.Khoa</td>
-
-                                    <td>
-                                        <i class="fa fa-envelope text-muted"></i>
-                                @item.Email
-                                    </td>
-
-                                    <td class="fw-bold text-danger text-center">
-                                @item.DiemRenLuyenTichLuy
-                                    </td>
-
-                                    <td class="text-center">
-                                        <a asp-action="SuaSinhVien"
-                                           asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-warning">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-
-                                        <a asp-action="SinhVienDelete"
-                                           asp-route-id="@item.Id"
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('Xóa sinh viên này?');">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="6" class="text-muted fst-italic py-5 text-center">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i> Chưa có dữ liệu sinh viên
+                                </td>
+                            </tr>
                     }
-                }
-            </tbody>
-        </table>
-
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td class="fw-bold ps-3">@item.MSSV</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary text-primary rounded-circle me-2 bg-opacity-10 p-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                        @item.HoTen
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="small">Lớp: <span class="fw-bold">@item.Lop</span></div>
+                                            <div class="text-muted x-small">@item.Khoa</div>
+                                        </td>
+                                        <td class="text-muted small">@item.Email</td>
+                                        <td class="text-center">
+                                            <span class="badge @(item.DiemRenLuyenTichLuy >= 80 ? "bg-success" : "bg-warning") border bg-opacity-10 p-2 text-@(item.DiemRenLuyenTichLuy >= 80 ? "success" : "warning") border-@(item.DiemRenLuyenTichLuy >= 80 ? "success" : "warning")">
+                                        @item.DiemRenLuyenTichLuy
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group rounded-pill overflow-hidden shadow-sm">
+                                                <a asp-action="SuaSinhVien" asp-route-id="@item.Id" class="btn btn-sm btn-white text-warning border-end" title="Sửa">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <a asp-action="SinhVienDelete" asp-route-id="@item.Id" class="btn btn-sm btn-white text-danger" title="Xóa"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa sinh viên này?');">
+                                                    <i class="bi bi-trash3"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-        <script>
-            function searchSinhVien() {
-                let input = document.getElementById("searchSinhVien").value.toLowerCase();
-                let rows = document.querySelectorAll("#sinhVienTable tr");
-
-                rows.forEach(row => {
-                    let text = row.innerText.toLowerCase();
-                    row.style.display = text.includes(input) ? "" : "none";
-                });
-            }
-        </script>
+        <script src="~/js/searchSinhVien.js" asp-append-version="true"></script>
+        <s
 }
