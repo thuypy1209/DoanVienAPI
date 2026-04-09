@@ -11,6 +11,8 @@ namespace DoanVienAPI.Data
         public DbSet<SinhVien> SinhViens { get; set; }
         public DbSet<HoatDong> HoatDongs { get; set; }
         public DbSet<DangKyHoatDong> DangKyHoatDongs { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<ChungNhan> ChungNhans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

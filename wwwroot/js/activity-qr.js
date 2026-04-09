@@ -4,16 +4,29 @@
  * @param {string} name - Tên hoạt động để hiển thị tiêu đề
  */
 function showQrCode(id, name) {
+
+    // Lấy element
+    const qrTitle = document.getElementById("qrTitle");
+    const qrImg = document.getElementById("qrImage");
+    const qrModalEl = document.getElementById("qrModal");
+
+    // ❗ FIX: nếu thiếu element thì dừng (tránh crash)
+    if (!qrTitle || !qrImg || !qrModalEl) {
+        console.error("QR elements not found:", {
+            qrTitle,
+            qrImg,
+            qrModalEl
+        });
+        return;
+    }
+
     // 1. Cập nhật tiêu đề Modal
-    document.getElementById("qrTitle").innerText = "Mã QR: " + name;
+    qrTitle.innerText = "Mã QR: " + name;
 
     // 2. Trỏ src của ảnh tới API GenerateQRCode
-    // Đường dẫn này phải khớp với [HttpGet("qr/{id}")] trong HoatDongController
     const qrImageUrl = "/api/HoatDong/qr/" + id;
 
-    const qrImg = document.getElementById("qrImage");
-
-    // Hiển thị trạng thái đang tải (tùy chọn)
+    // Hiển thị trạng thái đang tải
     qrImg.style.opacity = "0.5";
 
     qrImg.src = qrImageUrl;
@@ -23,8 +36,8 @@ function showQrCode(id, name) {
         qrImg.style.opacity = "1";
     };
 
-    // 3. Hiển thị Modal (Sử dụng Bootstrap 5 native)
-    var myModal = new bootstrap.Modal(document.getElementById('qrModal'));
+    // 3. Hiển thị Modal
+    var myModal = new bootstrap.Modal(qrModalEl);
     myModal.show();
 }
 
@@ -32,12 +45,20 @@ function showQrCode(id, name) {
  * Hàm in mã QR
  */
 function printQr() {
-    const qrSrc = document.getElementById("qrImage").src;
-    const activityName = document.getElementById("qrTitle").innerText;
+    const qrImg = document.getElementById("qrImage");
+    const qrTitle = document.getElementById("qrTitle");
+
+    // ❗ FIX: tránh null
+    if (!qrImg || !qrTitle) {
+        console.error("QR elements not found for print");
+        return;
+    }
+
+    const qrSrc = qrImg.src;
+    const activityName = qrTitle.innerText;
 
     if (!qrSrc) return;
 
-    // Tạo một cửa sổ mới để in
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
@@ -60,4 +81,22 @@ function printQr() {
         </html>
     `);
     printWindow.document.close();
+}
+
+/**
+ * Search bảng
+ */
+function searchTable() {
+    const inputEl = document.getElementById("searchInput");
+    const tableRows = document.querySelectorAll("#activityTable tr");
+
+    // ❗ FIX: check null
+    if (!inputEl) return;
+
+    let input = inputEl.value.toLowerCase();
+
+    tableRows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
 }

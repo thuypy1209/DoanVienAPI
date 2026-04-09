@@ -1,0 +1,95 @@
+﻿@model DoanVienAPI.Models.SinhVien
+
+@{
+    ViewData["Title"] = "Thêm Sinh viên";
+}
+
+@* Header trang *@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">
+        <i class="bi bi-person-plus-fill text-success"></i> Thêm Sinh viên mới
+    </h2>
+    <a asp-action="SinhVien" class="btn btn-outline-secondary rounded-pill shadow-sm">
+        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm" style="border-radius: 15px;">
+    <div class="card-body p-4">
+
+        @* THÔNG BÁO LỖI TỪ SERVER *@
+        @if (TempData["Error"] != null)
+        {
+                <div class="alert alert-danger mb-4 border-0 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+                </div>
+        }
+
+        <form asp-action="SinhVienCreate" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Mã số sinh viên (MSSV)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
+                        <input asp-for="MSSV" class="form-control" placeholder="Nhập MSSV..." required />
+                    </div>
+                    <span asp-validation-for="MSSV" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Họ và tên</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                        <input asp-for="HoTen" class="form-control" placeholder="Nhập họ tên..." required />
+                    </div>
+                    <span asp-validation-for="HoTen" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Lớp</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-door-open"></i></span>
+                        <input asp-for="Lop" class="form-control" placeholder="VD: 21DTHA1..." required />
+                    </div>
+                    <span asp-validation-for="Lop" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Khoa</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-building"></i></span>
+                        <input asp-for="Khoa" class="form-control" placeholder="VD: CNTT..." required />
+                    </div>
+                    <span asp-validation-for="Khoa" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Địa chỉ Email</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="tensinhvien@hutech.edu.vn" required />
+                </div>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="border-top pt-4 text-end">
+                <button type="reset" class="btn btn-light rounded-pill me-2 px-4">Làm mới</button>
+                <button type="submit" class="btn btn-success rounded-pill px-5 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> Xác nhận thêm
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

@@ -1,85 +1,58 @@
-﻿@{
+﻿@model IEnumerable<DoanVienAPI.Models.ChatMessage>
+@{
     ViewData["Title"] = "Phòng Chat Admin";
 }
 
 <div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">💬 Phòng Chat Chung (Admin & Sinh Viên)</h5>
+    <div class="card border-0 shadow-lg" style="border-radius: 15px;">
+        <div class="card-header bg-primary py-3 text-white" style="border-radius: 15px 15px 0 0;">
+            <h5 class="d-flex align-items-center mb-0">
+                <i class="bi bi-chat-dots-fill me-2"></i> 
+                Hỗ trợ Sinh viên HUTECH
+            </h5>
         </div>
-        <div class="card-body">
-            <div id="messagesList" class="mb-3 rounded border p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
-                <div class="text-muted small text-center">Chưa có tin nhắn nào...</div>
+        <div class="card-body bg-light">
+            <div id="messagesList" class="mb-3 rounded border bg-white p-3" style="height: 450px; overflow-y: auto;">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var msg in Model)
+                    {
+                        var isMe = msg.User == "Admin" || msg.User == "Quản trị viên";
+                                <div class="mb-3 @(isMe ? "text-end" : "text-start")">
+                                    <div class="d-inline-block rounded p-2 shadow-sm @(isMe ? "bg-primary text-white" : "bg-light border text-dark")" style="max-width: 75%;">
+                                        <div class="small fw-bold mb-1" style="font-size: 0.75rem;">@msg.User</div>
+                                        <div style="word-wrap: break-word;">@msg.Message</div>
+                                        <div class="mt-1 text-end" style="font-size: 0.65rem; opacity: 0.8;">
+                                    @msg.Timestamp.ToString("HH:mm")
+                                        </div>
+                                    </div>
+                                </div>
+                    }
+                }
+                else
+                {
+                        <div id="no-msg-temp" class="text-muted small mt-5 text-center">Chưa có tin nhắn nào trong lịch sử...</div>
+                }
             </div>
 
-            <div class="input-group">
-                <input type="text" id="userInput" class="form-control" value="Admin" readonly style="max-width: 100px; font-weight: bold;">
-                <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
-                <button id="sendButton" class="btn btn-primary">Gửi ➤</button>
+            <div class="input-group rounded shadow-sm">
+                <span class="input-group-text border-end-0 fw-bold text-primary bg-white">Admin</span>
+                <input type="text" id="messageInput" class="form-control border-start-0 py-2" placeholder="Nhập nội dung phản hồi..." autocomplete="off">
+                <button id="sendButton" class="btn btn-primary px-4">
+                    Gửi <i class="bi bi-send-fill ms-1"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-
-<script>
-// 1. Khai báo biến ở phạm vi toàn cục (không để trong hàm khác)
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chathub")
-        .withAutomaticReconnect()
-        .build();
-
-    // 2. Lắng nghe tin nhắn từ Server
-    connection.on("ReceiveMessage", function (data) {
-        const msgList = document.getElementById("messagesList");
-        if (msgList.innerText.trim() === "Chưa có tin nhắn nào...") {
-            msgList.innerHTML = "";
-        }
-
-        const isMe = data.user === "Admin" || data.user === "Quản trị viên";
-        const div = document.createElement("div");
-        div.className = isMe ? "text-end mb-3" : "text-start mb-3";
-
-        div.innerHTML = `
-            <div class="d-inline-block p-2 rounded ${isMe ? 'bg-primary text-white' : 'text-dark border bg-white'}" style="max-width: 80%;">
-                <div class="small fw-bold mb-1">${data.user}</div>
-                <div>${data.message}</div>
-            </div>
-        `;
-
-        msgList.appendChild(div);
-        msgList.scrollTop = msgList.scrollHeight;
-    });
-
-    // 3. Khởi động kết nối
-    connection.start()
-        .then(() => console.log("✅ SignalR Connected!"))
-        .catch(err => console.error("❌ Connection Error: ", err));
-
-    // 4. Xử lý gửi tin nhắn (Đảm bảo đoạn này nằm sau khi khai báo connection)
-    function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const message = input.value;
-
-        if (message.trim() !== "") {
-            // Gọi hàm SendMessage trong ChatHub.cs
-            connection.invoke("SendMessage", message).catch(err => console.error(err));
-            input.value = "";
-        }
-    }
-
-    // Gán sự kiện cho nút bấm
-    document.getElementById("sendButton").addEventListener("click", function (event) {
-        sendMessage();
-        event.preventDefault();
-    });
-
-    // Gán sự kiện phím Enter
-    document.getElementById("messageInput").addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            sendMessage();
-            event.preventDefault();
-        }
-    });
-</script>
+@section Scripts {
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+         <script src="~/js/chathub.js"></script>
+             <script>
+            // Logic connection ở đây sẽ không còn báo lỗi nữa
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub")
+                .build();
+            // ...
+        </script>
+}

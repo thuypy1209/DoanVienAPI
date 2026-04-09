@@ -87,7 +87,7 @@ namespace DoanVienAPI.Controllers
             {
                 MSSV = model.MSSV,
                 Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                HoTen = model.HoTen,               
+                HoTen = model.HoTen,
                 Email = model.Email,
                 Lop = model.Lop,
                 Khoa = model.Khoa,
@@ -105,13 +105,13 @@ namespace DoanVienAPI.Controllers
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-          
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.HoTen),
                 new Claim("MSSV", user.MSSV),
-                new Claim("Lop", user.Lop ?? ""), 
+                new Claim("Lop", user.Lop ?? ""),
                 new Claim("Khoa", user.Khoa ?? ""),
                 new Claim("DiemRL", user.DiemRenLuyenTichLuy.ToString()),
                 new Claim("Email", user.Email ?? "")
@@ -131,5 +131,17 @@ namespace DoanVienAPI.Controllers
 
             return tokenHandler.WriteToken(token);
         }
+        private async Task<bool> chanpassword(string mssv, string oldPassword, string newPassword)
+        {
+            var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.MSSV == mssv);
+            if (sinhVien == null) return false;
+            bool isValidOldPassword = BCrypt.Net.BCrypt.Verify(oldPassword, sinhVien.Password);
+            if (!isValidOldPassword) return false;
+            sinhVien.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.SinhViens.Update(sinhVien);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

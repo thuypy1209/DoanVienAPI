@@ -48,7 +48,8 @@ namespace DoanVienAPI.Controllers
                 sv.Lop,
                 sv.Khoa,
                 sv.Email,
-                sv.DiemRenLuyenTichLuy
+                sv.DiemRenLuyenTichLuy,
+                sv.AvatarUrl
             });
         }
         [HttpPost("upload-avatar")]
