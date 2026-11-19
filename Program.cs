@@ -119,16 +119,6 @@ else
 {
     app.UseHttpsRedirection();
 }
-// 3. CÁC API
-app.MapGet("/api/sinhvien", async (AppDbContext db) =>
-    await db.SinhViens.ToListAsync());
-
-app.MapPost("/api/sinhvien", async (AppDbContext db, SinhVien sv) =>
-{
-    db.SinhViens.Add(sv);
-    await db.SaveChangesAsync();
-    return Results.Ok(sv);
-});
 // Middleware
 app.UseStaticFiles(); 
 app.UseRouting();

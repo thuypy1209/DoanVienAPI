@@ -23,7 +23,7 @@ namespace DoanVienAPI.Controllers
         public async Task<IActionResult> Login(string username, string password)
         {
             // Kiểm tra tài khoản (Có thể sửa thành check Database ở đây)
-            if (username == "admin" && password == "123456")
+            if (username == "admin" && password == "@admin811111111")
             {
                 // Tạo thông tin người dùng (Claims)
                 var claims = new List<Claim>
@@ -56,5 +56,11 @@ namespace DoanVienAPI.Controllers
             return RedirectToAction("Login", "Account");
         }
 
-}
+        // 4. Trang từ chối quyền truy cập (Access Denied)
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+    }
 }

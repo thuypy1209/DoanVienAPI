@@ -35,6 +35,41 @@ namespace DoanVienAPI.Controllers
                 return BadRequest("Vui lòng nhập tài khoản và mật khẩu.");
             }
 
+            // Hỗ trợ tài khoản Admin đăng nhập qua API
+            if (model.Username == "admin" && model.Password == "123456")
+            {
+                var adminClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "0"),
+                    new Claim(ClaimTypes.Name, "Quản Trị Viên"),
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim("MSSV", "ADMIN")
+                };
+
+                var jwtSettings = _configuration.GetSection("Jwt");
+                var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(adminClaims),
+                    Expires = DateTime.UtcNow.AddHours(30),
+                    Issuer = jwtSettings["Issuer"],
+                    Audience = jwtSettings["Audience"],
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var adminToken = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+
+                return Ok(new
+                {
+                    Message = "Đăng nhập Admin thành công!",
+                    Token = adminToken,
+                    Role = "Admin",
+                    HoTen = "Quản Trị Viên",
+                    MSSV = "ADMIN"
+                });
+            }
+
             var sinhVien = await _context.SinhViens
                 .FirstOrDefaultAsync(sv => sv.MSSV == model.Username);
 
@@ -110,6 +145,7 @@ namespace DoanVienAPI.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.HoTen),
+                new Claim(ClaimTypes.Role, "SinhVien"),
                 new Claim("MSSV", user.MSSV),
                 new Claim("Lop", user.Lop ?? ""),
                 new Claim("Khoa", user.Khoa ?? ""),

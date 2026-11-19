@@ -1,14 +1,21 @@
-﻿/* Hệ thống Admin Quản lý Đoàn viên 
-    Author: Ní của Gemini
-*/
+﻿/* ========================================================
+   HỆ THỐNG QUẢN LÝ ĐOÀN VIÊN - MODERN DESIGN SYSTEM 2026
+   ======================================================== */
 
 :root {
-    --sidebar-width: 260px;
-    --sidebar-bg: #1a1d20;
-    --accent-color: #ffc107;
-    --primary-grad: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    --success-grad: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-    --warning-grad: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+    --sidebar-width: 270px;
+    --sidebar-bg: #0f172a;
+    --sidebar-surface: #1e293b;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --info-gradient: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+    --body-bg: #f8fafc;
+    --card-border: rgba(226, 232, 240, 0.85);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
 }
 
 /* 🛡️ RESET & GENERAL */
@@ -17,11 +24,28 @@
 }
 
 body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background-color: #f4f7f6;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--body-bg);
+    color: var(--text-main);
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+}
+
+/* Custom Slim Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 #wrapper {
@@ -29,60 +53,112 @@ body {
     width: 100vw;
     min-height: 100vh;
     align-items: stretch;
+    transition: all 0.3s ease;
 }
 
-/* 📱 SIDEBAR STYLING */
+/* ========================================================
+   📱 MODERN SIDEBAR
+   ======================================================== */
 #sidebar-wrapper {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
-    background: linear-gradient(180deg, #1e2125 0%, #111214 100%);
-    transition: all 0.3s ease;
-    z-index: 1000;
+    background: var(--sidebar-bg);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1040;
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
 }
 
-    #sidebar-wrapper *, #sidebar-wrapper {
-        list-style: none !important;
-        list-style-type: none !important;
-        text-decoration: none !important;
-    }
+#sidebar-wrapper .sidebar-brand {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
 
-        #sidebar-wrapper .sidebar-heading {
-            padding: 2rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent-color);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            text-align: center;
-        }
-
-.sidebar-nav-item {
-    margin: 0.3rem 1rem;
-    border-radius: 10px !important;
-    color: #adb5bd !important;
-    padding: 12px 18px !important;
+.brand-icon-box {
+    width: 44px;
+    height: 44px;
+    background: var(--primary-gradient);
+    border-radius: 14px;
     display: flex;
     align-items: center;
-    transition: 0.3s;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
 }
 
-    .sidebar-nav-item:hover {
-        background: rgba(255, 193, 7, 0.1) !important;
-        color: var(--accent-color) !important;
-        transform: translateX(5px);
-    }
+.sidebar-category {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    padding: 1.2rem 0.75rem 0.4rem;
+}
 
-    .sidebar-nav-item.active {
-        background: var(--accent-color) !important;
-        color: #000 !important;
-        font-weight: 700;
-        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-    }
+.sidebar-nav-item, .sidebar-nav-link {
+    display: flex !important;
+    width: 100% !important;
+    margin: 0.3rem 0;
+    border-radius: 12px;
+    color: #cbd5e1 !important;
+    padding: 11px 16px;
+    align-items: center;
+    text-decoration: none !important;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-/* 💻 CONTENT & NAVBAR */
+.sidebar-nav-item .nav-icon, .sidebar-nav-link .nav-icon {
+    font-size: 1.15rem;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    color: #94a3b8;
+    transition: transform 0.2s;
+}
+
+.sidebar-nav-item:hover, .sidebar-nav-link:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    transform: translateX(4px);
+}
+
+.sidebar-nav-item:hover .nav-icon, .sidebar-nav-link:hover .nav-icon {
+    transform: scale(1.1);
+    color: #ffffff;
+}
+
+.sidebar-nav-item.active, .sidebar-nav-link.active {
+    background: var(--primary-gradient) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+}
+
+.sidebar-footer-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.avatar-admin-sidebar {
+    width: 38px;
+    height: 38px;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* ========================================================
+   💻 CONTENT & TOP NAVBAR
+   ======================================================== */
 #page-content-wrapper {
     flex: 1;
     min-width: 0;
@@ -90,310 +166,205 @@ body {
     flex-direction: column;
 }
 
-.navbar {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(10px);
-    padding: 0.8rem 1.5rem;
-    border-bottom: 1px solid #e0e0e0 !important;
-}
-
-/* 🔔 NOTIFICATION & PULSE */
-.notification-bell {
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.3s;
-    position: relative;
-}
-
-    .notification-bell:hover {
-        background: #eee;
-    }
-
-.badge-pulse {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 10px;
-    height: 10px;
-    background-color: #ff4757;
-    border-radius: 50%;
-    border: 2px solid white;
-}
-
-.pulse-animation {
-    animation: pulse-red 2s infinite;
-}
-
-@keyframes pulse-red {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-    }
-
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
-    }
-
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-    }
-}
-
-.dropdown-notifications {
-    width: 300px;
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.notification-item {
-    border-bottom: 1px solid #f1f1f1;
-    transition: 0.2s;
-}
-
-    .notification-item:hover {
-        background-color: #f8f9fa;
-    }
-
-/* 📊 DASHBOARD CARDS (Tui gom từ Index cũ sang luôn cho ní) */
-.bg-grad-primary {
-    background: var(--primary-grad);
-}
-
-.bg-grad-success {
-    background: var(--success-grad);
-}
-
-.bg-grad-warning {
-    background: var(--warning-grad);
-}
-
-.stat-card {
-    border: none;
-    border-radius: 15px;
+.top-navbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--card-border);
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    min-height: 140px;
+    z-index: 1020;
 }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-
-.stat-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 4rem;
-    opacity: 0.2;
-}
-
-/* 🔄 TOGGLE LOGIC */
-#wrapper.toggled #sidebar-wrapper {
-    margin-left: calc(-1 * var(--sidebar-width));
-}
-/* Hệ thống Admin Quản lý Đoàn viên 
-    Author: Ní của Gemini
-*/
-
-:root {
-    --sidebar-width: 260px;
-    --sidebar-bg: #1a1d20;
-    --accent-color: #ffc107;
-    --primary-grad: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    --success-grad: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-    --warning-grad: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
-}
-
-/* 🛡️ RESET & GENERAL */
-* {
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background-color: #f4f7f6;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
-#wrapper {
-    display: flex;
-    width: 100vw;
-    min-height: 100vh;
-    align-items: stretch;
-}
-
-/* 📱 SIDEBAR STYLING */
-#sidebar-wrapper {
-    width: var(--sidebar-width);
-    min-width: var(--sidebar-width);
-    background: linear-gradient(180deg, #1e2125 0%, #111214 100%);
-    transition: all 0.3s ease;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-}
-
-    #sidebar-wrapper *, #sidebar-wrapper {
-        list-style: none !important;
-        list-style-type: none !important;
-        text-decoration: none !important;
-    }
-
-        #sidebar-wrapper .sidebar-heading {
-            padding: 2rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent-color);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            text-align: center;
-        }
-
-.sidebar-nav-item {
-    margin: 0.3rem 1rem;
-    border-radius: 10px !important;
-    color: #adb5bd !important;
-    padding: 12px 18px !important;
+.btn-toggle-sidebar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
-    transition: 0.3s;
+    justify-content: center;
+    transition: all 0.2s ease;
 }
 
-    .sidebar-nav-item:hover {
-        background: rgba(255, 193, 7, 0.1) !important;
-        color: var(--accent-color) !important;
-        transform: translateX(5px);
-    }
+.btn-toggle-sidebar:hover {
+    background: #e2e8f0;
+    color: var(--primary);
+    transform: scale(1.05);
+}
 
-    .sidebar-nav-item.active {
-        background: var(--accent-color) !important;
-        color: #000 !important;
-        font-weight: 700;
-        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-    }
+/* Search Box */
+.top-search-box {
+    background: #f1f5f9;
+    border-radius: 14px;
+    padding: 7px 16px;
+    width: 280px;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+}
 
-/* 💻 CONTENT & NAVBAR */
-#page-content-wrapper {
-    flex: 1;
-    min-width: 0;
+.top-search-box:focus-within {
+    background: #ffffff;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    width: 320px;
+}
+
+/* Button Round Icon */
+.btn-icon-round {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.2s ease;
 }
 
-.navbar {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(10px);
-    padding: 0.8rem 1.5rem;
-    border-bottom: 1px solid #e0e0e0 !important;
+.btn-icon-round:hover {
+    background: #f1f5f9;
+    color: var(--primary);
 }
 
-/* 🔔 NOTIFICATION & PULSE */
-.notification-bell {
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.3s;
-    position: relative;
+.pulse-badge {
+    animation: pulse-animation 2s infinite;
 }
 
-    .notification-bell:hover {
-        background: #eee;
-    }
-
-.badge-pulse {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 10px;
-    height: 10px;
-    background-color: #ff4757;
-    border-radius: 50%;
-    border: 2px solid white;
+@keyframes pulse-animation {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-.pulse-animation {
-    animation: pulse-red 2s infinite;
-}
-
-@keyframes pulse-red {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-    }
-
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
-    }
-
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-    }
-}
-
+/* Notifications Dropdown */
 .dropdown-notifications {
-    width: 300px;
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.notification-item {
-    border-bottom: 1px solid #f1f1f1;
-    transition: 0.2s;
-}
-
-    .notification-item:hover {
-        background-color: #f8f9fa;
-    }
-
-/* 📊 DASHBOARD CARDS (Tui gom từ Index cũ sang luôn cho ní) */
-.bg-grad-primary {
-    background: var(--primary-grad);
-}
-
-.bg-grad-success {
-    background: var(--success-grad);
-}
-
-.bg-grad-warning {
-    background: var(--warning-grad);
-}
-
-.stat-card {
-    border: none;
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    position: relative;
+    width: 320px;
+    border-radius: 18px;
     overflow: hidden;
-    min-height: 140px;
 }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+.notification-row {
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.notification-row:hover {
+    background: #f8fafc;
+}
+
+/* Top Avatar */
+.user-avatar-top {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+}
+
+/* 🔄 TOGGLE LOGIC (Mini Sidebar on Desktop) */
+@media (min-width: 769px) {
+    #wrapper.toggled #sidebar-wrapper {
+        width: 80px !important;
+        min-width: 80px !important;
+        margin-left: 0 !important;
     }
 
-.stat-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 4rem;
-    opacity: 0.2;
+    #wrapper.toggled .sidebar-brand {
+        padding: 1.25rem 0.5rem !important;
+        justify-content: center !important;
+    }
+    #wrapper.toggled .brand-text-box {
+        display: none !important;
+    }
+    #wrapper.toggled .brand-icon-box {
+        margin-right: 0 !important;
+    }
+
+    #wrapper.toggled .sidebar-category {
+        display: none !important;
+    }
+    #wrapper.toggled .sidebar-divider-mini {
+        display: block !important;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 0.8rem 0.5rem;
+    }
+
+    #wrapper.toggled .sidebar-nav-container {
+        padding: 0.75rem 0.5rem !important;
+    }
+    #wrapper.toggled .sidebar-nav-item,
+    #wrapper.toggled .sidebar-nav-link {
+        padding: 12px 0 !important;
+        justify-content: center !important;
+        margin: 0.4rem 0 !important;
+    }
+    #wrapper.toggled .sidebar-nav-item:hover,
+    #wrapper.toggled .sidebar-nav-link:hover {
+        transform: none !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+    }
+    #wrapper.toggled .sidebar-nav-item .nav-text,
+    #wrapper.toggled .sidebar-nav-link .nav-text {
+        display: none !important;
+    }
+    #wrapper.toggled .sidebar-nav-item .nav-icon,
+    #wrapper.toggled .sidebar-nav-link .nav-icon {
+        margin-right: 0 !important;
+        font-size: 1.35rem !important;
+    }
+
+    #wrapper.toggled .sidebar-nav-item .badge-count,
+    #wrapper.toggled .sidebar-nav-link .badge-count {
+        position: absolute !important;
+        top: 6px !important;
+        right: 14px !important;
+        width: 9px !important;
+        height: 9px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+        border: 2px solid #0f172a;
+    }
+
+    #wrapper.toggled .sidebar-footer-card {
+        margin: 10px 8px !important;
+        padding: 10px 0 !important;
+    }
+    #wrapper.toggled .footer-user-text {
+        display: none !important;
+    }
+    #wrapper.toggled .footer-flex-box {
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 10px !important;
+    }
 }
 
-#wrapper.toggled #sidebar-wrapper {
-    margin-left: calc(-1 * var(--sidebar-width));
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -270px;
+        position: fixed;
+        height: 100vh;
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0 !important;
+        width: 270px !important;
+        min-width: 270px !important;
+    }
 }
+
+/* Backward compatibility classes */
+.bg-grad-primary { background: var(--primary-gradient); }
+.bg-grad-success { background: var(--success-gradient); }
+.bg-grad-warning { background: var(--warning-gradient); }
