@@ -1,5 +1,6 @@
 ﻿using DoanVienAPI.Data;
 using DoanVienAPI.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace DoanVienAPI.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class AdminController: Controller
     {
         private readonly AppDbContext _context;

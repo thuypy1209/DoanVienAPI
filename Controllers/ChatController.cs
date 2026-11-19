@@ -1,14 +1,17 @@
 ﻿using DoanVienAPI.Data;
 using DoanVienAPI.Hubs;
 using DoanVienAPI.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DoanVienAPI.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme + "," + CookieAuthenticationDefaults.AuthenticationScheme)]
     public class ChatController : Controller
     {
         private readonly IHubContext<ChatHub> _hubContext;
@@ -19,16 +22,16 @@ namespace DoanVienAPI.Controllers
             _hubContext = hubContext;
             _context = context;
         }
+
+        // 1. DÀNH CHO MVC RAZOR VIEW TRÊN CỔNG 5000
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-            // 1. Lấy lịch sử 50 tin nhắn gần nhất để hiển thị
             var messages = await _context.ChatMessages
                 .OrderBy(m => m.Timestamp)
                 .Take(50)
                 .ToListAsync();
 
-            // 2. KHI ADMIN VÀO TRANG NÀY -> Đánh dấu tất cả tin nhắn là ĐÃ ĐỌC
-            // Để cái chuông thông báo trên Navbar nó tự mất số
             var unreadMessages = await _context.ChatMessages.Where(m => !m.IsRead).ToListAsync();
             if (unreadMessages.Any())
             {
@@ -39,14 +42,58 @@ namespace DoanVienAPI.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Truyền số lượng tin nhắn mới (sau khi đã đọc) vào ViewBag để Navbar không bị lỗi
             ViewBag.TinNhanMoi = 0;
-
             return View(messages);
         }
 
-        // API để lấy số lượng tin nhắn chưa đọc (phục vụ cho cái chuông nhảy số)
-        [HttpGet]
+        // ==========================================
+        // 2. DÀNH CHO REST API (REACT WEB & ANDROID APP)
+        // ==========================================
+
+        // GET: /api/Chat/messages - Lấy lịch sử tin nhắn
+        [HttpGet("/api/Chat/messages")]
+        public async Task<IActionResult> GetMessages()
+        {
+            var messages = await _context.ChatMessages
+                .OrderByDescending(m => m.Timestamp)
+                .Take(100)
+                .OrderBy(m => m.Timestamp)
+                .ToListAsync();
+
+            // Nếu người dùng là Admin, đánh dấu đã đọc để chuông tắt
+            var isAdmin = User.IsInRole("Admin") || User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+            if (isAdmin)
+            {
+                var unread = await _context.ChatMessages.Where(m => !m.IsRead).ToListAsync();
+                if (unread.Any())
+                {
+                    foreach (var m in unread) m.IsRead = true;
+                    await _context.SaveChangesAsync();
+                    await _hubContext.Clients.All.SendAsync("UpdateBellCount");
+                }
+            }
+
+            return Ok(messages);
+        }
+
+        // POST: /api/Chat/mark-read - Đánh dấu tất cả tin nhắn đã đọc
+        [HttpPost("/api/Chat/mark-read")]
+        public async Task<IActionResult> MarkRead()
+        {
+            var unread = await _context.ChatMessages.Where(m => !m.IsRead).ToListAsync();
+            if (unread.Any())
+            {
+                foreach (var m in unread) m.IsRead = true;
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("UpdateBellCount");
+            }
+            return Ok(new { message = "Đã đánh dấu đã đọc" });
+        }
+
+        // GET: /Chat/GetUnreadCount và /api/Chat/unread-count
+        [HttpGet("/api/Chat/unread-count")]
+        [HttpGet("/Chat/GetUnreadCount")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetUnreadCount()
         {
             var count = await _context.ChatMessages.CountAsync(m => !m.IsRead);

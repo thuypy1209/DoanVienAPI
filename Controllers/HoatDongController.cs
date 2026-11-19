@@ -23,15 +23,44 @@ namespace DoanVienAPI.Controllers
             _context = context;
         }
 
-        // POST: api/HoatDong/them
+        // POST: api/HoatDong/them (Chỉ Admin)
         [HttpPost("them")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ThemHoatDong([FromBody] HoatDong hoatDong)
         {
             _context.HoatDongs.Add(hoatDong);
             await _context.SaveChangesAsync();
             return Ok(hoatDong);
         }
-        // GET: api/HoatDong
+
+        // POST: api/HoatDong/upload-image (Chỉ Admin)
+        [HttpPost("upload-image")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0) return BadRequest("Vui lòng chọn file.");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "activities");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                string relativePath = $"/uploads/activities/{uniqueFileName}";
+                return Ok(new { message = "Upload ảnh thành công", imageUrl = relativePath });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi Server: {ex.Message}");
+            }
+        }
+        // GET: api/HoatDong (Cho phép tất cả xem danh sách hoạt động)
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetHoatDongs()
         {
@@ -110,8 +139,9 @@ namespace DoanVienAPI.Controllers
 
             return Ok(list);
         }
-        // 1. API SỬA HOẠT ĐỘNG (PUT)
+        // 1. API SỬA HOẠT ĐỘNG (PUT - Chỉ Admin)
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateHoatDong(int id, [FromBody] HoatDong model)
         {
             if (id != model.Id) return BadRequest("ID không khớp");
@@ -135,18 +165,26 @@ namespace DoanVienAPI.Controllers
             return Ok(new { message = "Cập nhật thành công!" });
         }
 
-        // 2. API XÓA HOẠT ĐỘNG (DELETE)
+        // 2. API XÓA HOẠT ĐỘNG (DELETE - Chỉ Admin)
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHoatDong(int id)
         {
             var hd = await _context.HoatDongs.FindAsync(id);
             if (hd == null) return NotFound();
 
+            // Xóa các đăng ký liên quan trước để tránh lỗi khóa ngoại
+            var dks = _context.DangKyHoatDongs.Where(d => d.HoatDongId == id);
+            _context.DangKyHoatDongs.RemoveRange(dks);
+
             _context.HoatDongs.Remove(hd);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã xóa hoạt động!" });
         }
+
+        // 3. XEM DANH SÁCH ĐĂNG KÝ (Chỉ Admin)
         [HttpGet("{id}/danhsach")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetDanhSachDangKy(int id)
         {
             var list = await _context.DangKyHoatDongs
@@ -165,8 +203,10 @@ namespace DoanVienAPI.Controllers
 
             return Ok(list);
         }
-        // 4. API DUYỆT / CHECK-IN CHO SINH VIÊN
+
+        // 4. API DUYỆT / CHECK-IN CHO SINH VIÊN (Chỉ Admin)
         [HttpPost("checkin/{dangKyId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CheckIn(int dangKyId)
         {
             var dk = await _context.DangKyHoatDongs.FindAsync(dangKyId);
