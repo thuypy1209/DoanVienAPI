@@ -64,10 +64,24 @@ namespace DoanVienAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHoatDongs()
         {
-            // Lấy danh sách, sắp xếp cái nào mới nhất lên đầu
             var list = await _context.HoatDongs
-                                     .OrderByDescending(h => h.ThoiGianBatDau)
-                                     .ToListAsync();
+                .OrderByDescending(h => h.ThoiGianBatDau)
+                .Select(h => new
+                {
+                    h.Id,
+                    h.TenHoatDong,
+                    h.MoTa,
+                    h.ThoiGianBatDau,
+                    h.ThoiGianKetThuc,
+                    h.DiaDiem,
+                    h.DiemCong,
+                    h.TrangThai,
+                    h.ImageUrl,
+                    h.LoaiHoatDong,
+                    h.SoLuongGioiHan,
+                    SoLuongDaDangKy = _context.DangKyHoatDongs.Count(dk => dk.HoatDongId == h.Id)
+                })
+                .ToListAsync();
             return Ok(list);
         }
         // 3. API ĐĂNG KÝ THAM GIA HOẠT ĐỘNG (POST)
@@ -97,7 +111,17 @@ namespace DoanVienAPI.Controllers
                 return BadRequest("Bạn đã đăng ký hoạt động này rồi.");
             }
 
-            // 4. Tạo bản ghi đăng ký mới
+            // 4. Kiểm tra giới hạn số lượng tham gia
+            if (hd.SoLuongGioiHan.HasValue && hd.SoLuongGioiHan.Value > 0)
+            {
+                var count = await _context.DangKyHoatDongs.CountAsync(dk => dk.HoatDongId == hoatDongId);
+                if (count >= hd.SoLuongGioiHan.Value)
+                {
+                    return BadRequest($"Hoạt động này đã đủ số lượng tham gia tối đa ({hd.SoLuongGioiHan.Value} người).");
+                }
+            }
+
+            // 5. Tạo bản ghi đăng ký mới
             var dangKy = new DangKyHoatDong
             {
                 SinhVienId = sinhVienId,
@@ -159,7 +183,8 @@ namespace DoanVienAPI.Controllers
             hd.TrangThai = model.TrangThai;
 
             hd.ImageUrl = model.ImageUrl;
-
+            hd.LoaiHoatDong = string.IsNullOrEmpty(model.LoaiHoatDong) ? hd.LoaiHoatDong : model.LoaiHoatDong;
+            hd.SoLuongGioiHan = model.SoLuongGioiHan;
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật thành công!" });

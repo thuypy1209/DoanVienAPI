@@ -121,6 +121,12 @@ namespace DoanVienAPI.Controllers
             sv.Khoa = model.Khoa;
             sv.Email = model.Email;
             sv.DiemRenLuyenTichLuy = model.DiemRenLuyenTichLuy;
+            sv.ChucVuDoan = string.IsNullOrEmpty(model.ChucVuDoan) ? sv.ChucVuDoan : model.ChucVuDoan;
+            sv.TrangThaiDoan = string.IsNullOrEmpty(model.TrangThaiDoan) ? sv.TrangThaiDoan : model.TrangThaiDoan;
+            sv.LaDoanVienUuTu = model.LaDoanVienUuTu;
+            sv.NgayVaoDoan = model.NgayVaoDoan;
+            sv.NoiVaoDoan = model.NoiVaoDoan;
+            sv.SoDoanVien = model.SoDoanVien;
 
             if (!string.IsNullOrEmpty(model.Password))
             {
@@ -241,6 +247,85 @@ namespace DoanVienAPI.Controllers
             });
         }
 
+        // 6. GET: api/SinhVien/export (Xuất file Excel danh sách sinh viên)
+        [HttpGet("export")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExportExcel()
+        {
+            ExcelPackage.License.SetNonCommercialPersonal("DoanVienAPI");
+
+            var list = await _context.SinhViens.ToListAsync();
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("SinhVien");
+
+                // Header
+                ws.Cells[1, 1].Value = "MSSV";
+                ws.Cells[1, 2].Value = "Họ tên";
+                ws.Cells[1, 3].Value = "Lớp";
+                ws.Cells[1, 4].Value = "Khoa";
+                ws.Cells[1, 5].Value = "Email";
+                ws.Cells[1, 6].Value = "Điểm RL";
+
+                using (var range = ws.Cells[1, 1, 1, 6])
+                {
+                    range.Style.Font.Bold = true;
+                }
+
+                // Data
+                int row = 2;
+                foreach (var sv in list)
+                {
+                    ws.Cells[row, 1].Value = sv.MSSV;
+                    ws.Cells[row, 2].Value = sv.HoTen;
+                    ws.Cells[row, 3].Value = sv.Lop;
+                    ws.Cells[row, 4].Value = sv.Khoa;
+                    ws.Cells[row, 5].Value = sv.Email;
+                    ws.Cells[row, 6].Value = sv.DiemRenLuyenTichLuy;
+                    row++;
+                }
+
+                ws.Cells.AutoFitColumns();
+
+                var fileBytes = package.GetAsByteArray();
+                return File(fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "DanhSachSinhVien.xlsx");
+            }
+        }
+
+        // 7. GET: api/SinhVien/template (Tải template mẫu Excel)
+        [HttpGet("template")]
+        [AllowAnonymous]
+        public IActionResult DownloadTemplate()
+        {
+            ExcelPackage.License.SetNonCommercialPersonal("DoanVienAPI");
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("Template");
+
+                ws.Cells[1, 1].Value = "MSSV";
+                ws.Cells[1, 2].Value = "HoTen";
+                ws.Cells[1, 3].Value = "Lop";
+                ws.Cells[1, 4].Value = "Khoa";
+                ws.Cells[1, 5].Value = "Email";
+
+                using (var range = ws.Cells[1, 1, 1, 5])
+                {
+                    range.Style.Font.Bold = true;
+                }
+
+                ws.Cells.AutoFitColumns();
+
+                var fileBytes = package.GetAsByteArray();
+                return File(fileBytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Mau_Nhap_SinhVien.xlsx");
+            }
+        }
+
         // ==========================================
         // DÀNH CHO SINH VIÊN: PROFILE & AVATAR
         // ==========================================
@@ -272,7 +357,13 @@ namespace DoanVienAPI.Controllers
                 sv.Khoa,
                 sv.Email,
                 sv.DiemRenLuyenTichLuy,
-                sv.AvatarUrl
+                sv.AvatarUrl,
+                sv.ChucVuDoan,
+                sv.TrangThaiDoan,
+                sv.LaDoanVienUuTu,
+                sv.NgayVaoDoan,
+                sv.NoiVaoDoan,
+                sv.SoDoanVien
             });
         }
 

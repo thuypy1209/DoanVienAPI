@@ -81,6 +81,19 @@ namespace DoanVienAPI.Controllers
             {
                 // Cộng điểm rèn luyện tích lũy
                 sinhVien.DiemRenLuyenTichLuy += (int)hoatDong.DiemCong;
+
+                // F. TỰ ĐỘNG CẤP GIẤY CHỨNG NHẬN ĐIỆN TỬ
+                var daCoChungNhan = await _context.ChungNhans.AnyAsync(c => c.SinhVienId == sinhVienId && c.HoatDongId == hoatDongId);
+                if (!daCoChungNhan)
+                {
+                    _context.ChungNhans.Add(new ChungNhan
+                    {
+                        MaChungNhan = $"CN-{DateTime.Now.Year}-HD{hoatDongId}-{sinhVien.MSSV}",
+                        NgayCap = DateTime.Now,
+                        SinhVienId = sinhVienId,
+                        HoatDongId = hoatDongId
+                    });
+                }
             }
 
             await _context.SaveChangesAsync();
