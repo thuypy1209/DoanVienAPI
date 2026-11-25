@@ -52,6 +52,36 @@ namespace DoanVienAPI.Migrations
                     b.ToTable("ChatMessages");
                 });
 
+            modelBuilder.Entity("DoanVienAPI.Models.ChungNhan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("HoatDongId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MaChungNhan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayCap")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SinhVienId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoatDongId");
+
+                    b.HasIndex("SinhVienId");
+
+                    b.ToTable("ChungNhans");
+                });
+
             modelBuilder.Entity("DoanVienAPI.Models.DangKyHoatDong", b =>
                 {
                     b.Property<int>("Id")
@@ -91,6 +121,45 @@ namespace DoanVienAPI.Migrations
                     b.ToTable("DangKyHoatDongs");
                 });
 
+            modelBuilder.Entity("DoanVienAPI.Models.DoanPhi", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HocKy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NamHoc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NgayNop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NguoiThu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SinhVienId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SoTien")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SinhVienId");
+
+                    b.ToTable("DoanPhis");
+                });
+
             modelBuilder.Entity("DoanVienAPI.Models.HoatDong", b =>
                 {
                     b.Property<int>("Id")
@@ -109,9 +178,16 @@ namespace DoanVienAPI.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LoaiHoatDong")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MoTa")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SoLuongGioiHan")
+                        .HasColumnType("int");
 
                     b.Property<string>("TenHoatDong")
                         .IsRequired()
@@ -143,6 +219,10 @@ namespace DoanVienAPI.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ChucVuDoan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DiemRenLuyenTichLuy")
                         .HasColumnType("int");
 
@@ -156,6 +236,9 @@ namespace DoanVienAPI.Migrations
                     b.Property<string>("Khoa")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("LaDoanVienUuTu")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Lop")
                         .HasColumnType("nvarchar(max)");
 
@@ -163,7 +246,20 @@ namespace DoanVienAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime?>("NgayVaoDoan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NoiVaoDoan")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SoDoanVien")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThaiDoan")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -173,6 +269,93 @@ namespace DoanVienAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("SinhViens");
+                });
+
+            modelBuilder.Entity("DoanVienAPI.Models.SoDoan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("GiayGioiThieuHe")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("NgayNop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SinhVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThaiSoDoan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ViTriLuuTru")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SinhVienId")
+                        .IsUnique();
+
+                    b.ToTable("SoDoans");
+                });
+
+            modelBuilder.Entity("DoanVienAPI.Models.XepLoaiDoanVien", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChiDoanDanhGia")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("DoanKhoaDuyet")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NamHoc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SinhVienId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TuDanhGia")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("XepLoai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SinhVienId", "NamHoc")
+                        .IsUnique();
+
+                    b.ToTable("XepLoaiDoanViens");
+                });
+
+            modelBuilder.Entity("DoanVienAPI.Models.ChungNhan", b =>
+                {
+                    b.HasOne("DoanVienAPI.Models.HoatDong", "HoatDong")
+                        .WithMany()
+                        .HasForeignKey("HoatDongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoanVienAPI.Models.SinhVien", "SinhVien")
+                        .WithMany()
+                        .HasForeignKey("SinhVienId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HoatDong");
+
+                    b.Navigation("SinhVien");
                 });
 
             modelBuilder.Entity("DoanVienAPI.Models.DangKyHoatDong", b =>
@@ -194,9 +377,48 @@ namespace DoanVienAPI.Migrations
                     b.Navigation("SinhVien");
                 });
 
+            modelBuilder.Entity("DoanVienAPI.Models.DoanPhi", b =>
+                {
+                    b.HasOne("DoanVienAPI.Models.SinhVien", "SinhVien")
+                        .WithMany("DanhSachDoanPhi")
+                        .HasForeignKey("SinhVienId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SinhVien");
+                });
+
+            modelBuilder.Entity("DoanVienAPI.Models.SoDoan", b =>
+                {
+                    b.HasOne("DoanVienAPI.Models.SinhVien", "SinhVien")
+                        .WithOne("SoDoan")
+                        .HasForeignKey("DoanVienAPI.Models.SoDoan", "SinhVienId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SinhVien");
+                });
+
+            modelBuilder.Entity("DoanVienAPI.Models.XepLoaiDoanVien", b =>
+                {
+                    b.HasOne("DoanVienAPI.Models.SinhVien", "SinhVien")
+                        .WithMany("DanhSachXepLoai")
+                        .HasForeignKey("SinhVienId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SinhVien");
+                });
+
             modelBuilder.Entity("DoanVienAPI.Models.SinhVien", b =>
                 {
+                    b.Navigation("DanhSachDoanPhi");
+
                     b.Navigation("DanhSachThamGia");
+
+                    b.Navigation("DanhSachXepLoai");
+
+                    b.Navigation("SoDoan");
                 });
 #pragma warning restore 612, 618
         }

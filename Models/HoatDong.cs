@@ -21,5 +21,14 @@ namespace DoanVienAPI.Models
         // Trạng thái: Sắp diễn ra, Đang diễn ra, Đã kết thúc
         public string TrangThai { get; set; } = "SapDienRa";
         public string? ImageUrl { get; set; }
+
+        // ==========================================
+        // MỞ RỘNG NGHIỆP VỤ HOẠT ĐỘNG
+        // ==========================================
+        // Giới hạn số lượng tham gia (null: không giới hạn)
+        public int? SoLuongGioiHan { get; set; }
+
+        // Phân loại hoạt động: TinhNguyen, HocThuat, VanTheMy, ChinhTriTuTuong, PhongTrao
+        public string LoaiHoatDong { get; set; } = "PhongTrao";
     }
 }

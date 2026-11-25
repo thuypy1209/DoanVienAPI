@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model EFMigrationsHistory {
+  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.NVarChar(150)
+  ProductVersion String @db.NVarChar(32)
+
+  @@map("__EFMigrationsHistory")
+}
+
+model ChatMessages {
+  Id        Int      @id @default(autoincrement())
+  User      String   @db.NVarChar(Max)
+  Message   String   @db.NVarChar(Max)
+  Timestamp DateTime @default(now())
+  IsRead    Boolean  @default(false)
+  Receiver  String?  @db.NVarChar(Max)
+}
+
+model DangKyHoatDongs {
+  Id               Int       @id @default(autoincrement())
+  SinhVienId       Int
+  HoatDongId       Int
+  NgayDangKy       DateTime  @default(now())
+  ThoiGianCheckIn  DateTime?
+  TrangThai        String    @default("ChoDuyet") @db.NVarChar(Max)
+  MaChungNhan      String?   @db.NVarChar(Max)
+  LinkTaiChungNhan String?   @db.NVarChar(Max)
+  HoatDongs        HoatDongs @relation(fields: [HoatDongId], references: [Id], onDelete: Cascade, onUpdate: NoAction)
+  SinhViens        SinhViens @relation(fields: [SinhVienId], references: [Id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([HoatDongId])
+  @@index([SinhVienId])
+}
+
+model HoatDongs {
+  Id              Int               @id @default(autoincrement())
+  TenHoatDong     String            @db.NVarChar(Max)
+  MoTa            String            @db.NVarChar(Max)
+  ThoiGianBatDau  DateTime
+  ThoiGianKetThuc DateTime
+  DiaDiem         String            @db.NVarChar(Max)
+  DiemCong        Int               @default(0)
+  TrangThai       String            @default("SapDienRa") @db.NVarChar(Max)
+  ImageUrl        String?           @db.NVarChar(Max)
+  LoaiHoatDong    String            @default("N'", map: "DF__HoatDongs__LoaiH__0F624AF8") @db.NVarChar(Max)
+  SoLuongGioiHan  Int?
+  ChungNhans      ChungNhans[]
+  DangKyHoatDongs DangKyHoatDongs[]
+}
+
+model SinhViens {
+  Id                  Int                @id @default(autoincrement())
+  MSSV                String             @unique @db.NVarChar(450)
+  HoTen               String             @db.NVarChar(Max)
+  Lop                 String?            @db.NVarChar(Max)
+  Khoa                String?            @db.NVarChar(Max)
+  Email               String?            @db.NVarChar(Max)
+  DiemRenLuyenTichLuy Int                @default(0)
+  Password            String             @default("") @db.NVarChar(Max)
+  AvatarUrl           String?            @db.NVarChar(Max)
+  ChucVuDoan          String             @default("N'", map: "DF__SinhViens__ChucV__0C85DE4D") @db.NVarChar(Max)
+  LaDoanVienUuTu      Boolean            @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__SinhViens__LaDoa__0D7A0286")
+  NgayVaoDoan         DateTime?
+  NoiVaoDoan          String?            @db.NVarChar(Max)
+  SoDoanVien          String?            @db.NVarChar(Max)
+  TrangThaiDoan       String             @default("N'", map: "DF__SinhViens__Trang__0E6E26BF") @db.NVarChar(Max)
+  ChungNhans          ChungNhans[]
+  DangKyHoatDongs     DangKyHoatDongs[]
+  DoanPhis            DoanPhis[]
+  SoDoans             SoDoans?
+  XepLoaiDoanViens    XepLoaiDoanViens[]
+}
+
+model ChungNhans {
+  Id          Int       @id(map: "PK_ChungNhans") @default(autoincrement())
+  MaChungNhan String    @db.NVarChar(Max)
+  NgayCap     DateTime
+  SinhVienId  Int
+  HoatDongId  Int
+  HoatDongs   HoatDongs @relation(fields: [HoatDongId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_ChungNhans_HoatDongs_HoatDongId")
+  SinhViens   SinhViens @relation(fields: [SinhVienId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_ChungNhans_SinhViens_SinhVienId")
+
+  @@index([HoatDongId], map: "IX_ChungNhans_HoatDongId")
+  @@index([SinhVienId], map: "IX_ChungNhans_SinhVienId")
+}
+
+model DoanPhis {
+  Id         Int       @id(map: "PK_DoanPhis") @default(autoincrement())
+  SinhVienId Int
+  HocKy      String    @db.NVarChar(Max)
+  NamHoc     String    @db.NVarChar(Max)
+  SoTien     Decimal   @db.Decimal(18, 2)
+  TrangThai  String    @db.NVarChar(Max)
+  NgayNop    DateTime?
+  NguoiThu   String?   @db.NVarChar(Max)
+  SinhViens  SinhViens @relation(fields: [SinhVienId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_DoanPhis_SinhViens_SinhVienId")
+
+  @@index([SinhVienId], map: "IX_DoanPhis_SinhVienId")
+}
+
+model SoDoans {
+  Id              Int       @id(map: "PK_SoDoans") @default(autoincrement())
+  SinhVienId      Int       @unique(map: "IX_SoDoans_SinhVienId")
+  TrangThaiSoDoan String    @db.NVarChar(Max)
+  NgayNop         DateTime?
+  ViTriLuuTru     String?   @db.NVarChar(Max)
+  GiayGioiThieuHe Boolean
+  SinhViens       SinhViens @relation(fields: [SinhVienId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_SoDoans_SinhViens_SinhVienId")
+}
+
+model XepLoaiDoanViens {
+  Id             Int       @id(map: "PK_XepLoaiDoanViens") @default(autoincrement())
+  SinhVienId     Int
+  NamHoc         String    @db.NVarChar(450)
+  XepLoai        String    @db.NVarChar(Max)
+  TuDanhGia      String?   @db.NVarChar(Max)
+  ChiDoanDanhGia String?   @db.NVarChar(Max)
+  DoanKhoaDuyet  Boolean
+  SinhViens      SinhViens @relation(fields: [SinhVienId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_XepLoaiDoanViens_SinhViens_SinhVienId")
+
+  @@unique([SinhVienId, NamHoc], map: "IX_XepLoaiDoanViens_SinhVienId_NamHoc")
+}
