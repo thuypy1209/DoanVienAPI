@@ -131,7 +131,6 @@ var app = builder.Build();
 // 2. CẤU HÌNH SWAGGER
 if (app.Environment.IsDevelopment())
 {
-    app.UseStaticFiles();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -139,23 +138,33 @@ else
 {
     app.UseHttpsRedirection();
 }
-// Middleware
+
+// Phục vụ Static Files & Single Page Application (SPA)
+app.UseDefaultFiles();
 app.UseStaticFiles(); 
 app.UseRouting();
 
 app.UseCors("AllowAll");
 
-//Authentication & Authorization
+// Authentication & Authorization
 app.UseAuthentication(); 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Admin}/{action=Index}/{id?}");
-
+// 1. API Controllers
 app.MapControllers();
-// Cấu hình SignalR
+
+// 2. SignalR Hub
 app.MapHub<DoanVienAPI.Hubs.ChatHub>("/chathub");
+
+// 3. MVC Legacy Routes (dành cho view Razor cũ nếu cần qua /mvc)
+app.MapControllerRoute(
+    name: "mvc",
+    pattern: "mvc/{controller=Admin}/{action=Index}/{id?}");
+
+// 4. SPA Fallback: Mọi route client-side (/, /login, /register, /admin, /admin/hoat-dong, /portal, /chat...)
+// sẽ chuyển cho React app xử lý
+app.MapFallbackToFile("index.html");
+
 // Chạy ứng dụng
 app.Run("http://0.0.0.0:5000");
     
